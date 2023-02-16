@@ -2,12 +2,14 @@
 - Datasets: COIN, SMSM, YouCook2, RareAct
 - change-of-state, prestate, poststate, state-inverse: triggers/updated_concept_cos.csv
 
-TODO: 1. balance out the true_caption/foiled_caption verb distribution
+TODO: 1. balance out the true_caption/foiled_caption verb distribution [in progress]
+TODO: 2. ikea dataset caption parser to be improved
+TODO: 3. violin dataset
 
 1. Scan dataset for triggers:
     1.1. datasets have different formats: load the propietary data and convert to a common format
     1.2. prioritize test/devel spltits over train splits 
-2. Extract object and subject, time-span (???)
+2. Extract object and subject, time-span
 3. Generate foils
 4. we could post-process the sentences with ChatGPT to make them more natural?
 """
@@ -23,7 +25,7 @@ from datamanager.dataloader import (
     get_dataset_path,
     load_cos_verbs,
     load_original_dataset,
-    save_dataset,
+    save_dataset_splits,
     load_processed_dataset,
 )
 
@@ -31,7 +33,6 @@ from foiler import create_foils
 from parsing import phrasal_verb_recognizer, get_object_phrase, init_parser
 from exceptions import EXCEPTIONS as manual_exceptions
 from exceptions import EXCLUDED as manual_excluded
-from nltk.corpus import wordnet as wn
 
 nlp = init_parser(model="en_core_web_sm")
 
@@ -62,7 +63,9 @@ def filter_captions(captions, cos_verbs, max_captions=None):
             root = _manual["verb"]
             my_object = _manual["object"]
 
-        if root in cos_verbs:
+        if (
+            root in cos_verbs
+        ):  # TODO: cos_verbs list could be exapnded with synonyms via wordnet
             v["verb"] = root
             v["object"] = get_object_phrase(parsed) if not is_exception else my_object
             v["pre-state"] = cos_verbs[root]["pre-state"]
@@ -99,7 +102,7 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
 
 def balance_dataset(dataset, cos_verbs, delta=0.1):
     """
-    Balance dataset to contain the approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
+    Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
     """
     merged_splits = {k: v for d in dataset for k, v in d.items()}
     counter_actual_verbs = Counter([v["verb"] for v in merged_splits.values()])
@@ -117,10 +120,6 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
         k: cos_verbs[k]["state-inverse"] for k in counter_actual_verbs.keys()
     }
 
-    # all_verbs = sum(
-    #     [list(_reverse2action_mapping.keys()), list(_action2reverse_mapping.keys())], []
-    # )
-
     action_mapping = {}
     action_mapping.update(_reverse2action_mapping)
     action_mapping.update(_action2reverse_mapping)
@@ -131,16 +130,8 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
 
     # TODO: remove this print
     for k, v in to_sample.items():
-        if v >= 0:
+        if v > 0:
             print(f"{k}: {v}")
-
-
-def get_synonyms(verb, max_synonyms=10):
-    synonyms = set()
-    for syn in wn.synsets(verb, pos=wn.VERB)[:max_synonyms]:
-        for l in syn.lemmas():
-            synonyms.add(l.name().replace("_", " "))
-    return list(synonyms)
 
 
 def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
@@ -149,7 +140,7 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
     for verb in action_mapping.keys():
         reverse_verb = action_mapping[
             verb
-        ]  # TODO: e.g., to dirty -> to wash but also to wash -> to clean
+        ]  # TODO: e.g., to dirty -> to wash but also to wash -> to stain / to dirty
         actual_count = counter_actual_verbs[verb]
         target_count = counter_reverse_action.get(reverse_verb, 0)
         n_samples = min(actual_count, target_count)
@@ -159,30 +150,45 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
 
 
 def main(args):
-    cos_mapping = load_cos_verbs(args.cos_verbs)
+    cos_mapping = load_cos_verbs(
+        args.cos_verbs, agument_it=True
+    )  # TODO: data augmentation should be a pre-processing step to make sure that it makes sense!
+    foil_types = ["action"]
+    print(f"- Foiling types: {foil_types}")
 
     if not args.load:
         dataset = load_original_dataset(get_dataset_path(args.dataset))
 
-        filtered_dataset, _, _ = filter_dataset(
+        save_dataset_splits(
+            dataset=dataset,
+            dataset_name=args.dataset,
+            level="formatted",
+            max_captions=args.max_captions,
+        )
+
+        filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
             dataset, cos_mapping, max_captions=args.max_captions
         )
 
+        save_dataset_splits(
+            dataset=filtered_dataset,
+            dataset_name=args.dataset,
+            level="filtered",
+            max_captions=args.max_captions,
+        )
+
+        print(counter_filtered.most_common(25))
+
         for i in range(len(filtered_dataset)):
             for k, v in filtered_dataset[i].items():
-                filtered_dataset[i][k].update(
-                    create_foils(
-                        v, foil_types=["action", "pre-state", "post-state", "inverse"]
-                    )
-                )
+                filtered_dataset[i][k].update(create_foils(v, foil_types=foil_types))
 
-        for split, data in zip(["train", "val", "test"], filtered_dataset):
-            save_dataset(
-                dataset=data,
-                path=os.path.join("output", args.dataset),
-                split=split,
-                nrows=args.max_captions,
-            )
+        save_dataset_splits(
+            dataset=filtered_dataset,
+            dataset_name=args.dataset,
+            level="foiled",
+            max_captions=args.max_captions,
+        )
 
     if args.load:
         filtered_dataset = load_processed_dataset(
