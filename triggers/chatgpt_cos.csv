@@ -1,0 +1,67 @@
+cos,pre,post,inv
+arrive,not here,here,depart
+ascend,at the bottom,above,descend
+awaken,asleep,awake,fall asleep
+boil,liquid,gas,freeze
+break,whole,broken,fix
+chop,whole,in pieces,assemble
+clean,dirty,clean,dirty
+clean up,dirty,clean,dirty
+climb down,at the top,at the bottom,climb up
+climb up,at the bottom,above,climb down
+close,open,closed,open
+combine,separated,combined,divide
+come,not here,here,leave
+come here,not here,here,go away
+conceal,out in the open,hidden,expose
+crack,whole,in pieces,mend
+cure,unhealthy,healthy,infect
+cut,whole,in smaller pieces,assemble
+cut off,whole,in smaller pieces,assemble
+divide,combined,separated,combine
+depart,here,away,arrive
+descend,at the top,below,ascend
+destroy,unbroken,broken,construct
+drop,above,below,lift
+escape,captive,free,capture
+expose,hidden,visible,conceal
+fall,in a higher position,in a lower position,rise
+fall asleep,awake,asleep,wake up
+fill,empty,full,empty
+find,in an unknown location,found,lose
+fire,employed,unemployed,hire
+fix,loose,tight,loosen
+freeze,liquid,solid,melt
+get a job,unemployed,employed,lose a job
+get fired,employed,unemployed,get a job
+go bad,fresh,stale,none
+heal,sick,healthy,damage
+hide,out in the open,hidden,reveal
+hire,unemployed,employed,fire
+leave,here,away,come
+liquefy,solid,liquid,solidify
+lose,in a known location,lost,find
+melt,solid,liquid,freeze
+unmelt,liquid,solid,melt
+mess up,clean,dirty,clean up
+mix,separated,blended,separate
+open,closed,open,close
+repair,broken,unbroken,destroy
+reveal,hidden,visible,conceal
+ripen,unripe,ripe,unripe
+rot,fresh,stale,freshen
+shut,open,closed,open
+slice,whole,in smaller pieces,assemble
+solidify,liquid,solid,liquefy
+tear,attached,detached,attach
+wake up,asleep,awake,fall asleep
+bake,raw,cooked,uncook
+wash,dirty,clean,dirty
+plug,disconnected,connected,unplug
+unplug,connected,disconnected,plug
+drill,whole,perforated,fill
+collide,distant,adjacent,miss
+screw,loose,tight,unscrew
+unscrew,tight,loose,screw
+pour,empty,full,empty
+whisk,separated,blended,separate

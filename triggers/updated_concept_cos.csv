@@ -1,0 +1,66 @@
+cos,pre,pre2,pre3,post,post2,post3,inv,inv2,inv3
+arrive,not here,absent,away,here,present,None,depart,leave,None
+ascend,at the bottom of,below,under,above,over,upstairs,descend,fall,plummet
+awaken,asleep,dozing,napping,awake,conscious,aware,fall asleep,None,None
+boil,cold,raw,None,hot,cooked,None,condense,freeze,None
+break,in one piece,whole,entire,in pieces,fragmentary,partial,fix,patch,reconstruct
+chop,whole,entire,None,in pieces,in smaller pieces,fragmentary,patch,None,None
+clean,dirty,messy,dusty,clean,stainless,spotless,dirty,stain,defile
+climb down,at the top,on top of,atop,at the bottom,downstairs,down,climb up,rise,ascend
+climb up,at the bottom,below,None,above,upwards,upstairs,climb down,decline,descend
+close,open,ajar,None,closed,shut,blocked,open,None,None
+combine,separated,None,None,combined,adjoining,unified,divide,disunite,separate
+come,not here,absent,away,here,present,None,leave,go,recede
+come here,not here,absent,away,here,present,None,go away,leave,go
+conceal,out in the open,exposed,None,hidden,secreted,cached,expose,show,reveal
+crack,whole,in one piece,None,in pieces,hollow,crashed,fit back together,None,None
+cure,unhealty,weak,ill,healthy,cured,fit,infect,posion,contaminate
+cut,whole,entire,None,in smaller pieces,incomplete,fragmentary,patch,None,None
+divide,combined,None,None,separated,None,None,combine,None,None
+depart,here,present,close,away,absent,distant,arrive,show up,come
+descend,at the top,on top of,atop,below,down,under,ascend,go up,rise
+destroy,unbroken,working,intact,broken,not working,None,construct,mend,patch
+drop,above,None,None,below,beneath,None,lift,pick,pick up
+escape,captive,in captivity,confined,free,unconfined,unrestrained,capture,jail,confine
+expose,hidden,concealed,None,visible,exposed,apparent,disguise,conceal,mask
+fall,in a higher position,above,up high,in a lower position,below,down low,rise,stand up,ascend
+fall asleep,awake,conscious,aware,asleep,sleeping,unconscious,awaken,arouse,wake
+fill,empty,None,None,full,non empty,None,empty,None,None
+find,in an unknown location,lost,missing,found,in a known position,None,lose,miss,None
+fire,employed,None,None,unemployed,None,jobless,hire,employ,assume
+fix,loose,shattered,smashed,tight,working,whole,loosen,disrupt,fracture
+freeze,liquid,hot,None,solid,colder,None,heat,boil,None
+get a job,unemployed,jobless,None,employed,None,None,loose a job,get fired,None
+get fired,employed,None,None,unemployed,jobless,None,get a job,get employed,None
+go bad,fresh,None,None,stale,None,None,None,None,None
+heal,sick,ill,None,healthy,fit,bouncing,damage,harm,hurt
+hide,out in the open,exposed,visible,hidden,concealed,secreted,display,exhibit,None
+hire,unemployed,jobless,None,employed,None,None,fire,quit,None
+leave,here,present,None,away,absent,None,come,stay,None
+liquefy,liquid,None,None,illiquid,solid,None,condense,None,None
+lose,in a known location,found,at hand,lost,missing,gone,win,find,come
+melt,solid,hard,rigid,liquid,smooth,fluid,harden,solidify,None
+melted,solid,None,None,liquid,None,None,unmelted,None,None
+mess up,clean,working,None,dirty,unclean,messed up,ameliorate,fix,enhance
+mix,separated,distinguished,disjoint,blended,mixed,combined,separate,unmix,None
+open,closed,shut,blocked,open,unclosed,free,close,shut,block
+repair,broken,shattered,None,unbroken,working,continuous,destroy,None,None
+return,absent,None,None,present,None,None,None,None,None
+reveal,hidden,concealed,None,visible,overt,apparent,conceal,None,None
+ripen,unripe,under ripe,None,ripe,None,None,None,None,None
+rot,fresh,None,None,stale,None,None,None,None,None
+shut,open,ajar,None,closed,close,to,open,None,None
+slice,whole,entire,None,in smaller pieces,incomplete,fragmentary,patch,aggregate,None
+solidify,solid,None,None,liquid,None,None,None,None,None
+tear,attached,None,None,detached,fragmentary,None,put,aggregate,None
+wake up,asleep,None,None,awake,conscious,None,go to sleep,None,None
+bake,raw,None,None,cooked,None,None,None,None,None
+wash,dirty,messy,dusty,clean,stainless,spotless,dirty,stain,defile
+plug,disconnected,unconnected,None,connected,wired,None,unplug,disconnect,None
+unplug,connected,wired,None,unconnected,disconnected,None,plug,connect,None
+drill,whole,None,None,perforated,None,None,fill,patch,None
+collide,distant,None,None,adjacent,None,None,avoid,None,None
+screw,loose,None,None,tight,None,None,unscrew,None,None
+unscrew,tight,None,None,loose,None,None,screw,None,None
+pour,empty,None,None,full,non empty,None,empty,None,None
+whisk,separated,distinguished,disjoint,blended,mixed,combined,separate,unmix,None
