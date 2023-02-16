@@ -15,13 +15,14 @@ PTB_TAG = {
 def inflect(verb, tag):
     assert tag in PTB_TAG, f"pos '{tag}' not in {list(tag.keys())}"
     # simple manager of multi-word verbs - maybe append the second part of the verb?
+    particle = None
     if " " in verb:
-        verb = verb.split(" ")[0]
+        verb, particle = verb.split(" ")
     infl = getInflection(verb, tag=tag)
     if len(infl) == 0:
         print(f"- Error inflecting '{verb}' with tag '{tag}'")
         infl = ["[UNK]"]
-    return infl[0]
+    return infl[0], particle
 
 
 def not_transitive(verb):
@@ -39,6 +40,8 @@ def is_plural(subject):
 
 
 def manage_aux(subject):
+    if subject is None:
+        raise ValueError("Subject cannot be None")
     if is_plural(subject):
         return "are"
     else:
@@ -60,19 +63,18 @@ def create_foils(sentence, foil_types=["action"]):
 
 
 def get_action_capt_and_foil(sentence):
-    tag = "VBZ" if not is_plural(sentence["object"]) else "VBP"
-    _verb = inflect(sentence["verb"], tag=tag)
-    _verb_3rd = inflect(sentence["verb"], tag="VBZ")
-    _inverse_3rd = inflect(sentence["state-inverse"], tag="VBZ")
-    _inverse = inflect(sentence["state-inverse"], tag=tag)
+    _object = sentence["object"] if sentence["object"] else "Someone"
+    tag = "VBZ" if not is_plural(_object) else "VBP"
+    _verb, _particle = inflect(sentence["verb"], tag=tag)
+    _inverse, _particle_inv = inflect(sentence["state-inverse"], tag=tag)
     _object = sentence["object"] if sentence["object"] else "Someone"
 
     if not_transitive(sentence["verb"]):
-        capt = f"{_object.capitalize()} {_verb}."
-        foil = f"{_object.capitalize()} {_inverse}"
+        capt = f"{_object.capitalize()} {_verb}{' ' + _particle if _particle else ''}."
+        foil = f"{_object.capitalize()} {_inverse}{' ' + _particle_inv if _particle_inv else ''}."
     else:
-        capt = f"Someone {_verb_3rd} {_object}."
-        foil = f"Someone {_inverse_3rd} {_object}."
+        capt = f"Someone {_verb} {_object}{' ' + _particle if _particle else ''}."
+        foil = f"Someone {_inverse} {_object}{' ' +_particle_inv if _particle_inv else ''}."
     return capt, foil
 
 
@@ -103,15 +105,15 @@ def get_poststate_capt_and_foil(sentence):
 
 
 def get_inverse_capt_and_foil(sentence):
-    _verb = inflect(sentence["verb"], tag="VBZ")
-    _inverse = inflect(sentence["state-inverse"], tag="VBZ")
+    _verb, _particle = inflect(sentence["verb"], tag="VBZ")
+    _inverse, _particle_inv = inflect(sentence["state-inverse"], tag="VBZ")
     _object = sentence["object"] if sentence["object"] else "Someone"
     aux = manage_aux(_object)
 
     if not_transitive(sentence["verb"]):
-        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, {_object} {_verb}. At the end, {_object} {aux} {sentence['post-state']}."
-        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, {_object} {_inverse}. At the end, {_object} {aux} {sentence['pre-state']}."
+        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, {_object} {_verb}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
+        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, {_object} {_inverse}{' ' + _particle if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     else:
-        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, Someone {_verb} {_object}. At the end, {_object} {aux} {sentence['post-state']}."
-        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, someone {_inverse} {_object}. At the end, {_object} {aux} {sentence['pre-state']}."
+        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, Someone {_verb} {_object}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
+        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, someone {_inverse} {_object}{' ' + _particle_inv if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     return capt, foil

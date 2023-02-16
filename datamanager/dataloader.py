@@ -263,3 +263,16 @@ def save_dataset(dataset, path, split, nrows=None):
     print(f"- Saving dataset to {filepath}")
     with open(filepath, "w") as f:
         json.dump(dataset, f)
+
+
+def load_processed_dataset(dataset_name, max_captions):
+    dataset = []
+    for split in ["train", "val", "test"]:
+        filepath = (
+            f"{dataset_name}_{split}.json"
+            if max_captions is None
+            else f"{dataset_name}_{split}_{max_captions}.json"
+        )
+        with open(os.path.join("output", filepath)) as f:
+            dataset.append(json.load(f))
+    return dataset

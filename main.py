@@ -24,13 +24,14 @@ from datamanager.dataloader import (
     load_cos_verbs,
     load_original_dataset,
     save_dataset,
+    load_processed_dataset,
 )
 
 from foiler import create_foils
 from parsing import phrasal_verb_recognizer, get_object_phrase, init_parser
 from exceptions import EXCEPTIONS as manual_exceptions
 from exceptions import EXCLUDED as manual_excluded
-
+from nltk.corpus import wordnet as wn
 
 nlp = init_parser(model="en_core_web_sm")
 
@@ -81,13 +82,14 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
     Filter dataset to contain only captions with change-of-state verbs.
     """
     filtered_dataset = []
-    for split in dataset:
+    for split, str_split in zip(dataset, ["train", "val", "test"]):
+        print(f"- Filtering {str_split}...")
         if len(split) != 0:
             _filtered_dataset, counter, c_filtered = filter_captions(
                 split, cos_verbs=cos_verbs, max_captions=max_captions
             )
         else:
-            _filtered_dataset = []
+            _filtered_dataset = {}
         filtered_dataset.append(_filtered_dataset)
     print(
         f"- Len filtered train: {len(filtered_dataset[0])} - val: {len(filtered_dataset[1])} - test: {len(filtered_dataset[2])}"
@@ -95,26 +97,99 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
     return filtered_dataset, counter, c_filtered
 
 
-def main(args):
-    dataset = load_original_dataset(get_dataset_path(args.dataset))
-    cos_mapping = load_cos_verbs(args.cos_verbs)
+def balance_dataset(dataset, cos_verbs, delta=0.1):
+    """
+    Balance dataset to contain the approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
+    """
+    merged_splits = {k: v for d in dataset for k, v in d.items()}
+    counter_actual_verbs = Counter([v["verb"] for v in merged_splits.values()])
+    # TODO: the mapping is an Injective function - but we could have more cos verb mapping to multiple reverse verbs (use get_synonyms)
+    _reverse2action_mapping = {
+        v["state-inverse"]: k
+        for k, v in cos_verbs.items()
+        if k in counter_actual_verbs.keys()
+    }  # TODO: state-inverse key is not fully appropritate naming
+    counter_reversed_action = {
+        k: counter_actual_verbs.get(k, 0) for k in _reverse2action_mapping.keys()
+    }
 
-    filtered_dataset, _, _ = filter_dataset(
-        dataset, cos_mapping, max_captions=args.max_captions
+    _action2reverse_mapping = {
+        k: cos_verbs[k]["state-inverse"] for k in counter_actual_verbs.keys()
+    }
+
+    # all_verbs = sum(
+    #     [list(_reverse2action_mapping.keys()), list(_action2reverse_mapping.keys())], []
+    # )
+
+    action_mapping = {}
+    action_mapping.update(_reverse2action_mapping)
+    action_mapping.update(_action2reverse_mapping)
+
+    to_sample = _to_sample(
+        action_mapping, counter_actual_verbs, counter_reversed_action
     )
 
-    for k, v in filtered_dataset[0].items():  # TODO: we are forcing to train set split
-        filtered_dataset[0][k].update(
-            create_foils(v, foil_types=["action", "pre-state", "post-state", "inverse"])
+    # TODO: remove this print
+    for k, v in to_sample.items():
+        if v >= 0:
+            print(f"{k}: {v}")
+
+
+def get_synonyms(verb, max_synonyms=10):
+    synonyms = set()
+    for syn in wn.synsets(verb, pos=wn.VERB)[:max_synonyms]:
+        for l in syn.lemmas():
+            synonyms.add(l.name().replace("_", " "))
+    return list(synonyms)
+
+
+def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
+    # TODO: this logic is a mess
+    to_sample = {}
+    for verb in action_mapping.keys():
+        reverse_verb = action_mapping[
+            verb
+        ]  # TODO: e.g., to dirty -> to wash but also to wash -> to clean
+        actual_count = counter_actual_verbs[verb]
+        target_count = counter_reverse_action.get(reverse_verb, 0)
+        n_samples = min(actual_count, target_count)
+        to_sample[verb] = n_samples
+        to_sample[reverse_verb] = n_samples
+    return to_sample
+
+
+def main(args):
+    cos_mapping = load_cos_verbs(args.cos_verbs)
+
+    if not args.load:
+        dataset = load_original_dataset(get_dataset_path(args.dataset))
+
+        filtered_dataset, _, _ = filter_dataset(
+            dataset, cos_mapping, max_captions=args.max_captions
         )
 
-    for split, data in zip(["train", "val", "test"], filtered_dataset):
-        save_dataset(
-            dataset=data,
-            path=os.path.join("output", args.dataset),
-            split=split,
-            nrows=args.max_captions,
+        for i in range(len(filtered_dataset)):
+            for k, v in filtered_dataset[i].items():
+                filtered_dataset[i][k].update(
+                    create_foils(
+                        v, foil_types=["action", "pre-state", "post-state", "inverse"]
+                    )
+                )
+
+        for split, data in zip(["train", "val", "test"], filtered_dataset):
+            save_dataset(
+                dataset=data,
+                path=os.path.join("output", args.dataset),
+                split=split,
+                nrows=args.max_captions,
+            )
+
+    if args.load:
+        filtered_dataset = load_processed_dataset(
+            dataset_name=args.dataset, max_captions=args.max_captions
         )
+
+    balance_dataset(filtered_dataset, cos_mapping)
 
     exit(0)
 
@@ -136,5 +211,6 @@ if __name__ == "__main__":
     )
     argparser.add_argument("-n", "--max_captions", type=int, default=None)
     argparser.add_argument("-m", "--model", type=str, default="en_core_web_trf")
+    argparser.add_argument("--load", action="store_true")
     args = argparser.parse_args()
     main(args)

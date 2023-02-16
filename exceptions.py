@@ -2,23 +2,23 @@ EXCEPTIONS = {
     "fall to the ground": {"verb": "fall", "object": "the athlete"},
     "add butter, hot sauce, pepper, garlic powder, melted butter, and mix butter": {
         "verb": "mix",
-        "object": "butter, hot sauce, pepper, garlic powder and melted butter",
+        "object": "the butter, hot sauce, pepper, garlic powder and melted butter",
     },
     "add potato mixture to wrapper and seal shut": {
         "verb": "shut",
-        "object": "wrapper",
+        "object": "the wrapper",
     },
     "add the lettuce and radicchio to bowl with the dressing and mix together": {
         "verb": "mix",
-        "object": "lettuce, radicchio and dressing",
+        "object": "the lettuce, radicchio and dressing",
     },
     "beat two eggs into the milk and whisk in a cup of melted butter": {
         "verb": "whisk",
-        "object": "two eggs",
+        "object": "the two eggs",
     },
     "boil the wrapped pierogies in boiling salted water": {
         "verb": "boil",
-        "object": "salted water",
+        "object": "the salted water",
     },
     "chop 2 garlic cloves grate ginger about 2 tsp and green onions finely": {
         "verb": "chop",
@@ -26,7 +26,7 @@ EXCEPTIONS = {
     },
     "chop some red onions, red pepper, and green pepper into square pieces', 'some red onions, red pepper, and green pepper into square pieces": {
         "verb": "chop",
-        "object": "chop some red onions, red pepper, and green pepper into square pieces.', 'red onions, red pepper, and green pepper",
+        "object": "the chop some red onions, red pepper, and green pepper into square pieces.', 'red onions, red pepper, and green pepper",
     },
     "close the front door or cover of the printer": {
         "verb": "close",
@@ -59,16 +59,19 @@ EXCEPTIONS = {
     "melt the wax with water": {"verb": "melt", "object": "the wax"},
     "mix 3 tsps of corn starch with water": {
         "verb": "mix",
-        "object": "corn starch and water",
+        "object": "the corn starch and water",
     },
     "mix hot pepper flakes, hot chili paste, and soy sauce": {
         "verb": "mix",
-        "object": "hot pepper flakes, hot chili paste, and soy sauce",
+        "object": "the hot pepper flakes, hot chili paste, and soy sauce",
     },
-    "mix melted butter with the batter": {"verb": "mix", "object": "butter and batter"},
+    "mix melted butter with the batter": {
+        "verb": "mix",
+        "object": "the butter and batter",
+    },
     "mix some parmesan cheese and pepper with the eggs in a bowl": {
         "verb": "mix",
-        "object": "cheese, pepper, and eggs",
+        "object": "the cheese, pepper, and eggs",
     },
     "mix the cheese with pepperoni": {
         "verb": "mix",
@@ -92,7 +95,7 @@ EXCEPTIONS = {
         "verb": "pour",
         "object": "the barbecue sauce",
     },
-    "prepare and boil water": {"verb": "boil", "object": "water"},
+    "prepare and boil water": {"verb": "boil", "object": "the water"},
     "put the chicken pieces in an oven for about 10 minutes until cheese to melt": {
         "verb": "melt",
         "object": "the cheese",
@@ -107,11 +110,14 @@ EXCEPTIONS = {
         "verb": "combine",
         "object": "the ingredients",
     },
-    "tear off the front of the sticker": {"verb": "tear", "object": "the sticker"},
-    "tear off the other side of the sticker": {"verb": "tear", "object": "the sticker"},
+    "tear off the front of the sticker": {"verb": "tear off", "object": "the sticker"},
+    "tear off the other side of the sticker": {
+        "verb": "tear off",
+        "object": "the sticker",
+    },
     "unscrew the screws used to fix the screen": {
         "verb": "unscrew",
-        "object": "the screw",
+        "object": "the screws",
     },
     "use the needle to open the SIM card slot": {
         "verb": "open",
@@ -131,47 +137,50 @@ EXCEPTIONS = {
         "verb": "clean",
         "object": "the lenses",
     },
-    "mix in salt and pepper.": {"verb": "mix", "object": "salt and pepper"},
-    "banknote falling like a feather or paper": {"verb": "fall", "object": "banknote"},
-    "spoon falling like a rock": {"verb": "fall", "object": "spoon"},
-    "stamp falling like a rock": {"verb": "fall", "object": "stamp"},
-    "pour the tea into the vessel": {"verb": "pour", "object": "tea"},
-    "pour the egg into the pot": {"verb": "fill", "object": "pot"},
-    "pour the ingredients into the bowl": {"verb": "fill", "object": "bowl"},
-    "pour oil into the wok": {"verb": "fill", "object": "wok"},
-    "pour raw materials": {"verb": "fill", "object": "bowl"},
-    "pour the wax into the vessel": {"verb": "fill", "object": "vessel"},
-    "pour the mixture on the meat loaf": {"verb": "pour", "object": "mixture"},
-    "pour some oil into a hot pan": {"verb": "fill", "object": "pan"},
-    "pour wine over the snails in a bowl": {"verb": "fill", "object": "bowl"},
+    "mix in salt and pepper.": {"verb": "mix", "object": "the salt and pepper"},
+    "banknote falling like a feather or paper": {
+        "verb": "fall",
+        "object": "the banknote",
+    },
+    "spoon falling like a rock": {"verb": "fall", "object": "the spoon"},
+    "stamp falling like a rock": {"verb": "fall", "object": "the stamp"},
+    "pour the tea into the vessel": {"verb": "pour", "object": "the tea"},
+    "pour the egg into the pot": {"verb": "fill", "object": "the pot"},
+    "pour the ingredients into the bowl": {"verb": "fill", "object": "the bowl"},
+    "pour oil into the wok": {"verb": "fill", "object": "the wok"},
+    "pour raw materials": {"verb": "fill", "object": "the bowl"},
+    "pour the wax into the vessel": {"verb": "fill", "object": "the vessel"},
+    "pour the mixture on the meat loaf": {"verb": "pour", "object": "the mixture"},
+    "pour some oil into a hot pan": {"verb": "fill", "object": "the pan"},
+    "pour wine over the snails in a bowl": {"verb": "fill", "object": "the bowl"},
     "pour the butter into the egg yolks": {
         "verb": "mix",
-        "object": "butter and egg yolks",
+        "object": "the butter and egg yolks",
     },
     "pour oil into a hot pan and add chopped onions and laksa sauce": {
         "verb": "fill",
-        "object": "pan",
+        "object": "the pan",
     },
     "pour the soup on bean sprouts and sprinkle parsley on top": {
         "verb": "fill",
-        "object": "bowl",
+        "object": "the bowl",
     },
     "pour the cooking oil into the wok and add curry powder": {
         "verb": "fill",
-        "object": "wok",
+        "object": "the wok",
     },
     "pour the marinade onto the chicken and mix": {
         "verb": "mix",
-        "object": "marinade and chicken",
+        "object": "the marinade and chicken",
     },
     "pour buttermilk and hot sauce on the chicken.": {
         "verb": "mix",
-        "object": "buttermilk, hot sauce and chicken",
+        "object": "the buttermilk, hot sauce and chicken",
     },
-    "cut a certain length": {"verb": "cut", "object": "cable"},
+    "cut a certain length": {"verb": "cut", "object": "the cable"},
     "add some lemon grass, fish sauce, sugar, salt, chicken powder, chilli flakes, and stir it to combine": {
         "verb": "combine",
-        "object": "lemon grass and the fish sauce",
+        "object": "the lemon grass and the fish sauce",
     },
     "combine the milk with the flour": {
         "verb": "combine",
@@ -195,19 +204,19 @@ EXCEPTIONS = {
     },
     "mix some cumin, cinnamon, black pepper, and paprika": {
         "verb": "mix",
-        "object": "cumin, cinnamon, black pepper, and paprika",
+        "object": "the cumin, cinnamon, black pepper, and paprika",
     },
     "mix paprika and pepper with the meat": {
         "verb": "mix",
-        "object": "parika, pepper and meat",
+        "object": "the parika, pepper and meat",
     },
     "mix soy sauce, sesame oil, sugar, finely chopped spring onions, and minced garlic": {
         "verb": "mix",
-        "object": "flour, baking soda, salt, and sugar",
+        "object": "the flour, baking soda, salt, and sugar",
     },
     "mix together an egg, butter, and butter milk": {
         "verb": "mix",
-        "object": "egg, butter, and butter milk",
+        "object": "the egg, butter, and butter milk",
     },
     "mix the lettuce with the sauce dressing and add parmesan cheese": {
         "verb": "mix",
@@ -219,31 +228,31 @@ EXCEPTIONS = {
     },
     "mix flour, ghee, and salt together": {
         "verb": "mix",
-        "object": "flour, ghee, and salt",
+        "object": "the flour, ghee, and salt",
     },
     "mix hot sauce and melted butter together": {
         "verb": "mix",
-        "object": "sauce and butter",
+        "object": "the sauce and butter",
     },
     "add korean red chili pepper flakes to the mixture and mix with hand": {
         "verb": "mix",
-        "object": "chili pepper flakes and mixture",
+        "object": "the chili pepper flakes and mixture",
     },
     "mix swiss cheddar and monterey jack cheese together in a bowl": {
         "verb": "mix",
-        "object": "cheddar and cheese",
+        "object": "the cheddar and cheese",
     },
     "mix ingredients in the bowl using a fork": {
         "verb": "mix",
-        "object": "ingredients",
+        "object": "the ingredients",
     },
     "add flour, cornmeal, sugar, salt, and baking soda to bowl and mix": {
         "verb": "mix",
-        "object": "flour, cornmeal, sugar, salt, and soda",
+        "object": "the flour, cornmeal, sugar, salt, and soda",
     },
     "add flour, paprika, garlic powder, black pepper, and salt to a bag and mix together": {
         "verb": "mix",
-        "object": "flour, paprika, garlic powder, pepper, and salt",
+        "object": "the flour, paprika, garlic powder, pepper, and salt",
     },
     "drain the spaghetti then mix it with the pancetta egg and cream": {
         "verb": "mix",
@@ -259,7 +268,7 @@ EXCEPTIONS = {
     },
     "fix the new string on the head of the guitar": {
         "verb": "fix",
-        "object": "guitar string",
+        "object": "the guitar string",
     },
     "clean up the interior of thepumpkin": {"verb": "clean", "object": "the pumpkin"},
     "slice the potato pumpkin and eggplant": {
@@ -288,7 +297,7 @@ EXCEPTIONS = {
     },
     "dropping ear plug carrying case in front of a water bottle": {
         "verb": "fall",
-        "object": "earplug carrying case",
+        "object": "the earplug carrying case",
     },
     "attaching mobile charger to plug socket": {
         "verb": "plug",
@@ -322,28 +331,28 @@ EXCEPTIONS = {
         "object": "the eggs and the milk",
     },
     "break three eggs and add a little cream": {"verb": "break", "object": "the eggs"},
-    "matchbox falling like a rock": {"verb": "fall", "object": "matchbox"},
-    "pour it into a glass": {"verb": "fill", "object": "glass"},
-    "pour into a glass": {"verb": "fill", "object": "glass"},
+    "matchbox falling like a rock": {"verb": "fall", "object": "the matchbox"},
+    "pour it into a glass": {"verb": "fill", "object": "the glass"},
+    "pour into a glass": {"verb": "fill", "object": "the glass"},
     "add in some flour and milk and whisk it": {
         "verb": "mix",
-        "object": "flour and milk",
+        "object": "the flour and milk",
     },
     "lifting wood log up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "wood log",
+        "object": "the wood log",
     },
     "lifting glue stick up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "glue stick",
+        "object": "the glue stick",
     },
     "lifting book up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "book",
+        "object": "the book",
     },
     "lifting firm plastic up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "firm plastic",
+        "object": "the firm plastic",
     },
     "lifting usb stick up completely, then letting it drop down": {
         "verb": "fall",
@@ -351,29 +360,29 @@ EXCEPTIONS = {
     },
     "lifting sketch pen up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "sketch pen",
+        "object": "the sketch pen",
     },
     "lifting set of compasses up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "compasses",
+        "object": "the compasses",
     },
     "lifting candle up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "candle",
+        "object": "the candle",
     },
     "lifting box tape up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "box tape",
+        "object": "the box tape",
     },
     "lifting hose head up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "hose head",
+        "object": "the hose head",
     },
     "lifting note pad up completely, then letting it drop down": {
         "verb": "fall",
-        "object": "note pad",
+        "object": "the note pad",
     },
-    "plugging mains plug into socket": {"verb": "plug", "object": "mains plug"},
+    "plugging mains plug into socket": {"verb": "plug", "object": "the mains plug"},
     "wash and slice the prawn and add it to the meat": {
         "verb": "slice",
         "object": "the prawn",
@@ -382,20 +391,20 @@ EXCEPTIONS = {
         "verb": "mix",
         "object": "the dressings",
     },
-    "mix in cheese": {"verb": "mix", "object": "cheese"},
-    "mix in flour": {"verb": "mix", "object": "flour"},
-    "mix in tamarind paste": {"verb": "mix", "object": "tamarind paste"},
-    "flush and wash the interior": {"verb": "wash", "object": "interior"},
+    "mix in cheese": {"verb": "mix", "object": "the cheese"},
+    "mix in flour": {"verb": "mix", "object": "the flour"},
+    "mix in tamarind paste": {"verb": "mix", "object": "the tamarind paste"},
+    "flush and wash the interior": {"verb": "wash", "object": "the interior"},
     "separate and cut the chicken wing at the two joints": {
         "verb": "cut",
-        "object": "chicken wing",
+        "object": "the chicken wing",
     },
-    "roll dough flat and cut into circles": {"verb": "cut", "object": "dough"},
+    "roll dough flat and cut into circles": {"verb": "cut", "object": "the dough"},
     "throwing throwing lighter in the air and letting it fall": {
         "verb": "fall",
-        "object": "lighter",
+        "object": "the lighter",
     },
-    "whisk the eggs": {"verb": "whisk", "object": "egg yolk and egg white"},
+    "whisk the eggs": {"verb": "whisk", "object": "the egg yolk and egg white"},
 }
 
 
@@ -443,6 +452,7 @@ EXCLUDED = [
     "pour some glue to the face",
     "pour the sauce on top of the egg",
     "pour half of the liquid to the mixed vegetable",
+    "pour some water to the soy milk maker",
     "toss everything well to combine",
     "combine flour, sugar, polenta, baking powder, egg, and milk",
     "mix soy sauce, sesame oil, sugar, finely chopped spring onions, and minced garlic",
@@ -451,6 +461,7 @@ EXCLUDED = [
     "mix chicken breast, apple grape, celery, lemon juice, cream together and season with black pepper and salt."
     "fold the squares inward and fix them",
     "slice it diagonally and serve",
+    "pour some soy beans",
     "mix the cooked bulgur wheat, boiled chickpeas, diced tomato, cucumber, leeks, and parsley",
     "lifting up one end of table without letting it drop down",
     "lifting jar up completely without letting it drop down",
