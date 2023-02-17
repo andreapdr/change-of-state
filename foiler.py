@@ -107,13 +107,13 @@ def get_poststate_capt_and_foil(sentence):
 def get_inverse_capt_and_foil(sentence):
     _verb, _particle = inflect(sentence["verb"], tag="VBZ")
     _inverse, _particle_inv = inflect(sentence["state-inverse"], tag="VBZ")
-    _object = sentence["object"] if sentence["object"] else "Someone"
+    _object = sentence["object"] if sentence["object"] else "someone"
     aux = manage_aux(_object)
 
     if not_transitive(sentence["verb"]):
         capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, {_object} {_verb}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
         foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, {_object} {_inverse}{' ' + _particle if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     else:
-        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, Someone {_verb} {_object}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
+        capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, someone {_verb} {_object}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
         foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, someone {_inverse} {_object}{' ' + _particle_inv if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     return capt, foil

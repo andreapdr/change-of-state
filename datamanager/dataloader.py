@@ -370,7 +370,7 @@ def get_synonyms(verb, max_synonyms=10):
 
 
 def save_dataset_splits(dataset, dataset_name, level, max_captions=None):
-    assert level in ["formatted", "processed", "filtered"]
+    assert level in ["formatted", "filtered", "foiled"]
     for split, data in zip(["train", "val", "test"], dataset):
         save_dataset(
             dataset=data,
@@ -396,8 +396,9 @@ def save_dataset(dataset, path, fname, split, nrows):
         json.dump(dataset, f)
 
 
-def load_processed_dataset(dataset_name, max_captions):
-    fdir = os.path.join("output", dataset_name)
+def load_processed_dataset(dataset_name, level, max_captions):
+    level_mapping = {0: "formatted", 1: "filtered", 2: "foiled", 3: "balanced"}
+    fdir = os.path.join("output", level_mapping[level], dataset_name)
     dataset = []
     for split in ["train", "val", "test"]:
         filepath = (

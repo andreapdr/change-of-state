@@ -150,18 +150,32 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
 
 
 def main(args):
+    """
+    Pipeline: format -> filter -> foil -> balance
+    """
+    level = args.load
+    assert 0 <= level <= 3, "Load level (--load 'int') must be in [0, 3]"
+    print(
+        f"- running pipeline: {['formatting', 'filtering', 'foiling', 'balancing'][level:]}"
+    )
+
     cos_mapping = load_cos_verbs(
         args.cos_verbs, agument_it=args.augment
     )  # TODO: data augmentation should be a pre-processing step to make sure that it makes sense!
-    foil_types = ["action"]
-    print(f"- Foiling types: {foil_types}")
 
-    if not args.load:
+    foil_types = ["action", "inverse"]  # TODO: hard-coded
+
+    if level == 0:
         dataset = load_original_dataset(get_dataset_path(args.dataset))
-
         save_dataset_splits(
             dataset=dataset, dataset_name=args.dataset, level="formatted"
         )
+
+    if level <= 1:
+        if level == 1:
+            filtered_dataset = load_processed_dataset(
+                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+            )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
             dataset, cos_mapping, max_captions=args.max_captions
@@ -174,8 +188,12 @@ def main(args):
             max_captions=args.max_captions,
         )
 
-        print(counter_filtered.most_common(25))
-
+    if level <= 2:
+        if level == 2:
+            filtered_dataset = load_processed_dataset(
+                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+            )
+        print(f"- Foiling types: {foil_types}")
         for i in range(len(filtered_dataset)):
             for k, v in filtered_dataset[i].items():
                 filtered_dataset[i][k].update(create_foils(v, foil_types=foil_types))
@@ -187,15 +205,15 @@ def main(args):
             max_captions=args.max_captions,
         )
 
-    if args.load:
-        filtered_dataset = load_processed_dataset(
-            dataset_name=args.dataset, max_captions=args.max_captions
-        )
+    if level <= 3:
+        # TODO: balancing step should be carried out over all of the merged and filtered together ...
+        if level == 3:
+            filtered_dataset = load_processed_dataset(
+                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+            )
+        balance_dataset(filtered_dataset, cos_mapping)
 
-    # TODO: balancing should be carried out over all of the merged and filtered together ...
-    balance_dataset(filtered_dataset, cos_mapping)
-
-    exit(0)
+    exit()
 
 
 if __name__ == "__main__":
@@ -215,7 +233,7 @@ if __name__ == "__main__":
     )
     argparser.add_argument("-n", "--max_captions", type=int, default=None)
     argparser.add_argument("-m", "--model", type=str, default="en_core_web_trf")
-    argparser.add_argument("--load", action="store_true")
+    argparser.add_argument("--load", type=int, default=0)
     argparser.add_argument("--augment", action="store_true")
     args = argparser.parse_args()
     main(args)
