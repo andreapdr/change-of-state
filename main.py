@@ -151,7 +151,7 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
 
 def main(args):
     cos_mapping = load_cos_verbs(
-        args.cos_verbs, agument_it=True
+        args.cos_verbs, agument_it=args.augment
     )  # TODO: data augmentation should be a pre-processing step to make sure that it makes sense!
     foil_types = ["action"]
     print(f"- Foiling types: {foil_types}")
@@ -160,10 +160,7 @@ def main(args):
         dataset = load_original_dataset(get_dataset_path(args.dataset))
 
         save_dataset_splits(
-            dataset=dataset,
-            dataset_name=args.dataset,
-            level="formatted",
-            max_captions=args.max_captions,
+            dataset=dataset, dataset_name=args.dataset, level="formatted"
         )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
@@ -195,6 +192,7 @@ def main(args):
             dataset_name=args.dataset, max_captions=args.max_captions
         )
 
+    # TODO: balancing should be carried out over all of the merged and filtered together ...
     balance_dataset(filtered_dataset, cos_mapping)
 
     exit(0)
@@ -218,5 +216,6 @@ if __name__ == "__main__":
     argparser.add_argument("-n", "--max_captions", type=int, default=None)
     argparser.add_argument("-m", "--model", type=str, default="en_core_web_trf")
     argparser.add_argument("--load", action="store_true")
+    argparser.add_argument("--augment", action="store_true")
     args = argparser.parse_args()
     main(args)

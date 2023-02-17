@@ -11,15 +11,16 @@ def phrasal_verb_recognizer(parsed):
     root = None
     for token in parsed:
         if token.dep_ == "ROOT":
-            root = token.orth_
+            root = token.lemma_
         if (
             token.dep_ == "prt"
             and token.head.pos_ == "VERB"  # TODO: this is probably useless?
             and token.head.dep_ == "ROOT"
         ):
-            verb = token.head.orth_
             particle = token.orth_
-            return f"{verb} {particle}"
+            return f"{root} {particle}"
+            # verb = token.head.lemma_
+            # return f"{verb} {particle}"
     return root
 
 

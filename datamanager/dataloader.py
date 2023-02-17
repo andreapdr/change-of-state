@@ -20,8 +20,41 @@ def get_dataset_path(datasetname):
         return os.path.expanduser("~/datasets/ikea_asm/gt_segments.json")
     elif datasetname == "violin":
         return os.path.expanduser("~/datasets/violin/violin_annotation.json")
+    elif datasetname == "star":
+        return os.path.expanduser("~/datasets/star/")
     else:
         raise ValueError(f"Dataset {datasetname} not supported!")
+
+
+def load_star_dataset(path):
+    train_split = json.load(open(os.path.join(path, "STAR_train.json")))
+    val_split = json.load(open(os.path.join(path, "STAR_val.json")))
+    test_split = json.load(open(os.path.join(path, "STAR_test.json")))
+
+    train, val, test = {}, {}, {}
+    # skipping test split since we do not have ground truth labels
+    for data, split in zip(
+        [train_split, val_split],
+        ["train", "val"],
+    ):
+        print(f"- split: {split} has len: {len(data)}")
+        for elem in data:
+            entry = {
+                "sentence": elem["question"],
+                "video_id": elem["video_id"],
+                "object": elem["answer"],
+                "timestamp": [elem["start"], elem["end"]],
+                "split": split,
+            }
+            if split == "train":
+                train[elem["question_id"]] = entry
+            elif split == "val":
+                val[elem["question_id"]] = entry
+            elif split == "test":
+                test[elem["question_id"]] = entry
+            else:
+                raise ValueError(f"Split {split} not supported!")
+    return (train, val, test)
 
 
 def load_original_dataset(path):
@@ -38,6 +71,8 @@ def load_original_dataset(path):
         dataset = load_ikea(path)
     elif "violin" in path.lower():
         dataset = load_violin(path)
+    elif "star" in path.lower():
+        dataset = load_star_dataset(path)
     else:
         raise ValueError(f"Dataset not supported!")
     print(
@@ -280,18 +315,13 @@ def load_cos_verbs(path, agument_it=False):
 
     # prestates
     prestate = cos_df.pre.to_list()
-    # prestate2 = cos_df.pre2.to_list()
-    # prestate3 = cos_df.pre3.to_list()
 
     # poststates
     poststate = cos_df.post.to_list()
-    # poststate2 = cos_df.post2.to_list()
     # poststate3 = cos_df.post3.to_list()
 
     # inverse states
     inverse = cos_df.inv.to_list()
-    # inverse2 = cos_df.inv2.to_list()
-    # inverse3 = cos_df.inv3.to_list()
 
     # create dict
     for (
@@ -339,7 +369,7 @@ def get_synonyms(verb, max_synonyms=10):
     return synonyms[:max_synonyms]
 
 
-def save_dataset_splits(dataset, dataset_name, level, max_captions):
+def save_dataset_splits(dataset, dataset_name, level, max_captions=None):
     assert level in ["formatted", "processed", "filtered"]
     for split, data in zip(["train", "val", "test"], dataset):
         save_dataset(
@@ -347,11 +377,11 @@ def save_dataset_splits(dataset, dataset_name, level, max_captions):
             path=os.path.join("output", level, dataset_name),
             fname=dataset_name,
             split=split,
-            nrows=max_captions
+            nrows=max_captions,
         )
 
 
-def save_dataset(dataset, path, fname, split, nrows=None):
+def save_dataset(dataset, path, fname, split, nrows):
     """
     Save dataset to disk.
     """
