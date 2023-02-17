@@ -15,6 +15,7 @@ TODO: 3. violin dataset
 """
 
 import os
+import json
 from argparse import ArgumentParser
 from collections import Counter
 from time import time
@@ -149,6 +150,19 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
     return to_sample
 
 
+def save_actions_statistics(counter, c_filtered, dataset_name):
+    print(f"- Saving dataset action counts")
+    fp = os.path.join("output", "statistics", dataset_name)
+    os.makedirs(fp, exist_ok=True)
+    fp_all = os.path.join(fp, "all_actions.json")
+    fp_filtered = os.path.join(fp, "filtered_actions.json")
+    with open(fp_all, "w") as f:
+        json.dump(counter, f)
+    with open(fp_filtered, "w") as f:
+        json.dump(c_filtered, f)
+    return
+
+
 def main(args):
     """
     Pipeline: format -> filter -> foil -> balance
@@ -173,7 +187,7 @@ def main(args):
 
     if level <= 1:
         if level == 1:
-            filtered_dataset = load_processed_dataset(
+            dataset = load_processed_dataset(
                 dataset_name=args.dataset, level=level, max_captions=args.max_captions
             )
 
@@ -187,6 +201,8 @@ def main(args):
             level="filtered",
             max_captions=args.max_captions,
         )
+
+        save_actions_statistics(counter_all_actions, counter_filtered, args.dataset)
 
     if level <= 2:
         if level == 2:

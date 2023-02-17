@@ -397,8 +397,9 @@ def save_dataset(dataset, path, fname, split, nrows):
 
 
 def load_processed_dataset(dataset_name, level, max_captions):
-    level_mapping = {0: "formatted", 1: "filtered", 2: "foiled", 3: "balanced"}
+    level_mapping = {1: "formatted", 2: "filtered", 3: "foiled"}
     fdir = os.path.join("output", level_mapping[level], dataset_name)
+    print(f"- Loading dataset from {fdir}")
     dataset = []
     for split in ["train", "val", "test"]:
         filepath = (
