@@ -1,5 +1,6 @@
 from collections import Counter
 from datamanager.dataloader import load_processed_dataset, load_cos_verbs
+import spacy
 
 
 def balance_dataset(dataset, cos_verbs, delta=0.1):
@@ -51,7 +52,66 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
     return to_sample
 
 
+def load_verbs():
+    import json
+    import os
+
+    coin = json.load(
+        open(os.path.join("output", "statistics", "coin", "all_actions_trf.json"))
+    )
+    ikea = json.load(
+        open(os.path.join("output", "statistics", "ikea", "all_actions_trf.json"))
+    )
+    rareact = json.load(
+        open(os.path.join("output", "statistics", "rareact", "all_actions_trf.json"))
+    )
+    smsm = json.load(
+        open(os.path.join("output", "statistics", "smsm", "all_actions_trf.json"))
+    )
+    star = json.load(
+        open(os.path.join("output", "statistics", "star", "all_actions_trf.json"))
+    )
+    yc = json.load(
+        open(os.path.join("output", "statistics", "yc", "all_actions_trf.json"))
+    )
+
+    merged = {**coin, **ikea, **rareact, **star, **smsm, **yc}
+    return list(set(merged.keys()))
+
+
+def cluster_words(model="en_core_web_lg", k=10):
+    model = spacy.load(model)
+    verbs = list(model.pipe(load_verbs()))
+    similars = {}
+    for verb in verbs:
+        if model(verb)[0].pos_ == "VERB":
+            similars[verb] = get_top_similar(model, verb, verbs, k)
+    return similars
+
+
+def get_top_similar(model, word, candidates, k):
+    # TODO: phrasal verb similarity
+    _word = model(word)
+    sims = [
+        (word, c, _word.similarity(c[0]))
+        for c in candidates
+        if c[0] != word[0] and c[0].pos_ == "VERB"
+    ]
+    sims.sort(key=lambda x: x[2], reverse=True)
+    sims = [(s[1], round(s[2], 3)) for s in sims]
+    return sims[:k]
+
+
 if __name__ == "__main__":
+    similars = cluster_words(model="en_core_web_lg", k=15)
+    import sys
+    import os
+    from pprint import pprint
+
+    with open(os.path.join("output", "similarities.txt"), "w") as f:
+        sys.stdout = f
+        pprint(similars)
+    exit()
     coin = load_processed_dataset("coin", level=3, model_size="trf", max_captions=None)
     ikea = load_processed_dataset("ikea", level=3, model_size="trf", max_captions=None)
     rareact = load_processed_dataset(

@@ -69,7 +69,7 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
 
         if (
             root in cos_verbs
-        ):  # TODO: cos_verbs list could be exapnded with synonyms via wordnet
+        ):  # TODO: cos_verbs list could be expanded with synonyms via wordnet
             v["verb"] = root
             v["object"] = get_object_phrase(parsed) if not is_exception else my_object
             v["pre-state"] = cos_verbs[root]["pre-state"]
@@ -93,7 +93,7 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
         print(f"- Filtering {str_split}...")
         if len(split) != 0:
             _filtered_dataset, counter, c_filtered = filter_captions(
-                split, cos_verbs=cos_verbs, max_captions=max_captions, add_subject=True
+                split, cos_verbs=cos_verbs, max_captions=max_captions, add_subject=False
             )
         else:
             _filtered_dataset = {}
