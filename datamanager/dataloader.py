@@ -88,7 +88,7 @@ def load_violin(path):
     for k, v in dataset.items():
         if v["split"] == "train":
             train[k] = v
-        elif v["split"] == "val":
+        elif v["split"] == "validate":
             val[k] = v
         elif v["split"] == "test":
             test[k] = v
@@ -290,7 +290,7 @@ def _unfold_yc_entry(key, entry):
     return new_entry
 
 
-def load_cos_verbs(path, agument_it=False):
+def load_cos_verbs(path, augment_it=False):
     """
     Load change-of-state verbs from csv file.
     Each row consits of verb, (up to 3) prestate,
@@ -341,7 +341,7 @@ def load_cos_verbs(path, agument_it=False):
             "state-inverse": inv,
         }
 
-    if agument_it:
+    if augment_it:
         cos_dict = augment_cos(cos_dict)
 
     return cos_dict
@@ -369,7 +369,7 @@ def get_synonyms(verb, max_synonyms=10):
     return synonyms[:max_synonyms]
 
 
-def save_dataset_splits(dataset, dataset_name, level, max_captions=None):
+def save_dataset_splits(dataset, dataset_name, level, model_size, max_captions=None):
     assert level in ["formatted", "filtered", "foiled"]
     for split, data in zip(["train", "val", "test"], dataset):
         save_dataset(
@@ -378,10 +378,11 @@ def save_dataset_splits(dataset, dataset_name, level, max_captions=None):
             fname=dataset_name,
             split=split,
             nrows=max_captions,
+            model_size=model_size,
         )
 
 
-def save_dataset(dataset, path, fname, split, nrows):
+def save_dataset(dataset, path, fname, split, nrows, model_size):
     """
     Save dataset to disk.
     """
@@ -389,23 +390,25 @@ def save_dataset(dataset, path, fname, split, nrows):
     os.makedirs(path, exist_ok=True)
     path = os.path.join(path, fname)
     filepath = (
-        f"{path}_{split}.json" if nrows is None else f"{path}_{split}_{nrows}.json"
+        f"{path}_{split}_{model_size}.json"
+        if nrows is None
+        else f"{path}_{split}_{model_size}_{nrows}.json"
     )
     print(f"- Saving dataset to {filepath}")
     with open(filepath, "w") as f:
         json.dump(dataset, f)
 
 
-def load_processed_dataset(dataset_name, level, max_captions):
+def load_processed_dataset(dataset_name, level, model_size, max_captions):
     level_mapping = {1: "formatted", 2: "filtered", 3: "foiled"}
     fdir = os.path.join("output", level_mapping[level], dataset_name)
     print(f"- Loading dataset from {fdir}")
     dataset = []
     for split in ["train", "val", "test"]:
         filepath = (
-            f"{dataset_name}_{split}.json"
+            f"{dataset_name}_{split}_{model_size}.json"
             if max_captions is None
-            else f"{dataset_name}_{split}_{max_captions}.json"
+            else f"{dataset_name}_{split}_{model_size}_{max_captions}.json"
         )
         with open(os.path.join(fdir, filepath)) as f:
             dataset.append(json.load(f))

@@ -1,6 +1,7 @@
 cos,pre,post,inv
 arrive,not here,here,depart
 ascend,at the bottom,above,descend
+attach,separated,attached,detach
 awaken,asleep,awake,fall asleep
 boil,liquid,gas,freeze
 break,whole,broken,fix
@@ -14,6 +15,7 @@ combine,separated,combined,divide
 come,not here,here,leave
 come here,not here,here,go away
 conceal,out in the open,hidden,expose
+cover,visible,hidden,uncover
 crack,whole,in pieces,mend
 cure,unhealthy,healthy,infect
 cut,whole,in smaller pieces,assemble
@@ -22,6 +24,7 @@ divide,combined,separated,combine
 depart,here,away,arrive
 descend,at the top,below,ascend
 destroy,unbroken,broken,construct
+dig,visible,covered,dig up
 drink,full,empty,fill
 drop,above,below,lift
 escape,captive,free,capture
@@ -40,6 +43,7 @@ heal,sick,healthy,damage
 hide,out in the open,hidden,reveal
 hire,unemployed,employed,fire
 leave,here,away,come
+lift,in a lower position,in a higher position,drop
 liquefy,solid,liquid,solidify
 lose,in a known location,lost,find
 melt,solid,liquid,freeze
@@ -59,10 +63,12 @@ wake up,asleep,awake,fall asleep
 bake,raw,cooked,uncook
 wash,dirty,clean,dirty
 plug,disconnected,connected,unplug
+plug in, disconnected,connected,unplug
 unplug,connected,disconnected,plug
 drill,whole,perforated,fill
 collide,distant,adjacent,miss
 screw,loose,tight,unscrew
+spill,full,empty,fill
 unscrew,tight,loose,screw
 pour,empty,full,empty
 whisk,separated,blended,separate

@@ -3,7 +3,6 @@ import spacy
 
 def init_parser(model="en_core_web_trf"):
     print(f"- Loading spacy model {model}")
-    # nlp = spacy.load("en_core_web_sm")
     return spacy.load(model)
 
 
@@ -19,8 +18,6 @@ def phrasal_verb_recognizer(parsed):
         ):
             particle = token.orth_
             return f"{root} {particle}"
-            # verb = token.head.lemma_
-            # return f"{verb} {particle}"
     return root
 
 

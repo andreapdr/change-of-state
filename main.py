@@ -35,10 +35,11 @@ from parsing import phrasal_verb_recognizer, get_object_phrase, init_parser
 from exceptions import EXCEPTIONS as manual_exceptions
 from exceptions import EXCLUDED as manual_excluded
 
-nlp = init_parser(model="en_core_web_sm")
+MODEL = "en_core_web_trf"
+nlp = init_parser(model=MODEL)
 
 
-def filter_captions(captions, cos_verbs, max_captions=None):
+def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
     tinit = time()
     verbs = []
     filtered_dataset = {}
@@ -49,8 +50,10 @@ def filter_captions(captions, cos_verbs, max_captions=None):
         if i == max_captions:
             break
         # TODO: sometimes could be useful to add the subject "I" (e.g. in COIN dataset for sure)
-        # parsed = nlp(f'I {v["sentence"]}')
-        parsed = nlp(v["sentence"])
+        if add_subject:
+            parsed = nlp(f'I {v["sentence"]}')
+        else:
+            parsed = nlp(v["sentence"])
         root = phrasal_verb_recognizer(parsed)
         verbs.append(root)
 
@@ -90,7 +93,7 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
         print(f"- Filtering {str_split}...")
         if len(split) != 0:
             _filtered_dataset, counter, c_filtered = filter_captions(
-                split, cos_verbs=cos_verbs, max_captions=max_captions
+                split, cos_verbs=cos_verbs, max_captions=max_captions, add_subject=True
             )
         else:
             _filtered_dataset = {}
@@ -150,16 +153,23 @@ def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
     return to_sample
 
 
-def save_actions_statistics(counter, c_filtered, dataset_name):
+def save_actions_statistics(counter, c_filtered, dataset_name, model_size=None):
     print(f"- Saving dataset action counts")
     fp = os.path.join("output", "statistics", dataset_name)
     os.makedirs(fp, exist_ok=True)
-    fp_all = os.path.join(fp, "all_actions.json")
-    fp_filtered = os.path.join(fp, "filtered_actions.json")
+    fp_all = os.path.join(
+        fp, f"all_actions_{model_size}.json" if model_size else f"all_actions.json"
+    )
+    fp_filtered = os.path.join(
+        fp,
+        f"filtered_actions_{model_size}.json"
+        if model_size
+        else f"filtered_actions.json",
+    )
     with open(fp_all, "w") as f:
-        json.dump(counter, f)
+        json.dump(dict(counter.most_common()), f)
     with open(fp_filtered, "w") as f:
-        json.dump(c_filtered, f)
+        json.dump(dict(c_filtered.most_common()), f)
     return
 
 
@@ -168,13 +178,14 @@ def main(args):
     Pipeline: format -> filter -> foil -> balance
     """
     level = args.load
+    model_size = MODEL.split("_")[-1]
     assert 0 <= level <= 3, "Load level (--load 'int') must be in [0, 3]"
     print(
         f"- running pipeline: {['formatting', 'filtering', 'foiling', 'balancing'][level:]}"
     )
 
     cos_mapping = load_cos_verbs(
-        args.cos_verbs, agument_it=args.augment
+        args.cos_verbs, augment_it=args.augment
     )  # TODO: data augmentation should be a pre-processing step to make sure that it makes sense!
 
     foil_types = ["action", "inverse"]  # TODO: hard-coded
@@ -182,13 +193,19 @@ def main(args):
     if level == 0:
         dataset = load_original_dataset(get_dataset_path(args.dataset))
         save_dataset_splits(
-            dataset=dataset, dataset_name=args.dataset, level="formatted"
+            dataset=dataset,
+            dataset_name=args.dataset,
+            level="formatted",
+            model_size=model_size,
         )
 
     if level <= 1:
         if level == 1:
             dataset = load_processed_dataset(
-                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+                dataset_name=args.dataset,
+                level=level,
+                model_size=model_size,
+                max_captions=args.max_captions,
             )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
@@ -199,15 +216,24 @@ def main(args):
             dataset=filtered_dataset,
             dataset_name=args.dataset,
             level="filtered",
+            model_size=model_size,
             max_captions=args.max_captions,
         )
 
-        save_actions_statistics(counter_all_actions, counter_filtered, args.dataset)
+        save_actions_statistics(
+            counter_all_actions,
+            counter_filtered,
+            args.dataset,
+            model_size=model_size,
+        )
 
     if level <= 2:
         if level == 2:
             filtered_dataset = load_processed_dataset(
-                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+                dataset_name=args.dataset,
+                level=level,
+                model_size=model_size,
+                max_captions=args.max_captions,
             )
         print(f"- Foiling types: {foil_types}")
         for i in range(len(filtered_dataset)):
@@ -218,6 +244,7 @@ def main(args):
             dataset=filtered_dataset,
             dataset_name=args.dataset,
             level="foiled",
+            model_size=model_size,
             max_captions=args.max_captions,
         )
 
@@ -225,7 +252,10 @@ def main(args):
         # TODO: balancing step should be carried out over all of the merged and filtered together ...
         if level == 3:
             filtered_dataset = load_processed_dataset(
-                dataset_name=args.dataset, level=level, max_captions=args.max_captions
+                dataset_name=args.dataset,
+                level=level,
+                model_size=model_size,
+                max_captions=args.max_captions,
             )
         balance_dataset(filtered_dataset, cos_mapping)
 
