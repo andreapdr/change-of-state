@@ -1,132 +1,77 @@
-from collections import Counter
-from datamanager.dataloader import load_processed_dataset, load_cos_verbs
+import json
+from collections import Counter, defaultdict
+
 import spacy
+from nltk.corpus import wordnet as wn
+
+from datamanager.dataloader import load_cos_verbs, load_processed_dataset, load_verblist
+from exceptions import MANUALLY_EXCLUDED_VERBS, hardcoded_verb_preprocessing
 
 
-def balance_dataset(dataset, cos_verbs, delta=0.1):
-    """
-    Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
-    """
-    merged_splits = {k: v for d in dataset for k, v in d.items()}
-    counter_actual_verbs = Counter([v["verb"] for v in merged_splits.values()])
-    # TODO: the mapping is an Injective function - but we could have more cos verb mapping to multiple reverse verbs (use get_synonyms)
-    _reverse2action_mapping = {
-        v["state-inverse"]: k
-        for k, v in cos_verbs.items()
-        if k in counter_actual_verbs.keys()
-    }  # TODO: state-inverse key is not fully appropritate naming
-    counter_reversed_action = {
-        k: counter_actual_verbs.get(k, 0) for k in _reverse2action_mapping.keys()
-    }
-
-    _action2reverse_mapping = {
-        k: cos_verbs[k]["state-inverse"] for k in counter_actual_verbs.keys()
-    }
-
-    action_mapping = {}
-    action_mapping.update(_reverse2action_mapping)
-    action_mapping.update(_action2reverse_mapping)
-
-    to_sample = _to_sample(
-        action_mapping, counter_actual_verbs, counter_reversed_action
-    )
-
-    # TODO: remove this print
-    for k, v in to_sample.items():
-        if v > 0:
-            print(f"{k}: {v}")
+def cluster_around_cos():
+    model = spacy.load("en_core_web_lg")
+    cos = load_cos_verbs("triggers/mylist.csv")
+    cos_list = list(model.pipe(list(cos.keys())))
+    # cos_str = [str(c) for c in cos_list]
+    verbs = list(model.pipe(load_verblist()))
+    word2cos = {}
+    for verb in [
+        v
+        for v in verbs
+        if v[0].pos_ == "VERB" and str(v) not in MANUALLY_EXCLUDED_VERBS
+    ]:
+        _verb = hardcoded_verb_preprocessing(str(verb))
+        top_cos = get_top_similar(model, _verb, cos_list, 1, threshold=0.3)
+        word2cos[str(verb)] = top_cos[0] if len(top_cos) > 0 else str(verb)
+    print("ok")
+    with open("triggers/verb2cos_mapping.json", "w") as f:
+        json.dump(word2cos, f)
 
 
-def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
-    # TODO: this logic is a mess
-    to_sample = {}
-    for verb in action_mapping.keys():
-        reverse_verb = action_mapping[
-            verb
-        ]  # TODO: e.g., to dirty -> to wash but also to wash -> to stain / to dirty
-        actual_count = counter_actual_verbs[verb]
-        target_count = counter_reverse_action.get(reverse_verb, 0)
-        n_samples = min(actual_count, target_count)
-        to_sample[verb] = n_samples
-        to_sample[reverse_verb] = n_samples
-    return to_sample
+def postprocess_via_wn(verb, verb_constraint):
+    # TODO: wordnet does not seem to manage well pharasal verbs
+    verb = str(verb).split(" ")[0]
+    verb_synonyms = _get_wn_synonyms(verb)
+    verb_antonyms = _get_wn_antonyms(verb)
+    if verb_constraint is not None:
+        verb_synonyms = [s for s in verb_synonyms if s in verb_constraint]
+        verb_antonyms = [s for s in verb_antonyms if s in verb_constraint]
+    return verb_synonyms, verb_antonyms
 
 
-def load_verbs():
-    import json
-    import os
-
-    coin = json.load(
-        open(os.path.join("output", "statistics", "coin", "all_actions_trf.json"))
-    )
-    ikea = json.load(
-        open(os.path.join("output", "statistics", "ikea", "all_actions_trf.json"))
-    )
-    rareact = json.load(
-        open(os.path.join("output", "statistics", "rareact", "all_actions_trf.json"))
-    )
-    smsm = json.load(
-        open(os.path.join("output", "statistics", "smsm", "all_actions_trf.json"))
-    )
-    star = json.load(
-        open(os.path.join("output", "statistics", "star", "all_actions_trf.json"))
-    )
-    yc = json.load(
-        open(os.path.join("output", "statistics", "yc", "all_actions_trf.json"))
-    )
-
-    merged = {**coin, **ikea, **rareact, **star, **smsm, **yc}
-    return list(set(merged.keys()))
-
-
-def cluster_words(model="en_core_web_lg", k=10):
-    model = spacy.load(model)
-    verbs = list(model.pipe(load_verbs()))
-    similars = {}
-    for verb in verbs:
-        if model(verb)[0].pos_ == "VERB":
-            similars[verb] = get_top_similar(model, verb, verbs, k)
-    return similars
-
-
-def get_top_similar(model, word, candidates, k):
+def get_top_similar(model, word, candidates, k, check_pos=True, threshold=0.5):
     # TODO: phrasal verb similarity
     _word = model(word)
-    sims = [
-        (word, c, _word.similarity(c[0]))
-        for c in candidates
-        if c[0] != word[0] and c[0].pos_ == "VERB"
-    ]
+    if check_pos:
+        sims = [
+            (str(word), str(c), _word.similarity(c))
+            for c in candidates
+            if c[0] != _word[0] and c[0].pos_ == "VERB"
+        ]
+    else:
+        sims = [(str(word), str(c), _word.similarity(c[0])) for c in candidates]
     sims.sort(key=lambda x: x[2], reverse=True)
-    sims = [(s[1], round(s[2], 3)) for s in sims]
+    sims = [s[1] for s in sims if s[2] >= threshold]
     return sims[:k]
 
 
+def _get_wn_antonyms(word):
+    antonyms = []
+    for syn in wn.synsets(word, pos=wn.VERB):
+        for l in syn.lemmas():
+            if l.antonyms():
+                antonyms.append(l.antonyms()[0].name())
+    return sorted([a.replace("_", " ") for a in set(antonyms)])
+
+
+def _get_wn_synonyms(word):
+    synonyms = [
+        sorted(list(set(ss.lemma_names(lang="eng")) - {word}))
+        for ss in wn.synsets(word, lang="eng", pos=wn.VERB)
+    ]
+    synonyms = sorted(list(set(sum(synonyms, []))))
+    return [s.replace("_", " ") for s in synonyms]
+
+
 if __name__ == "__main__":
-    similars = cluster_words(model="en_core_web_lg", k=15)
-    import sys
-    import os
-    from pprint import pprint
-
-    with open(os.path.join("output", "similarities.txt"), "w") as f:
-        sys.stdout = f
-        pprint(similars)
-    exit()
-    coin = load_processed_dataset("coin", level=3, model_size="trf", max_captions=None)
-    ikea = load_processed_dataset("ikea", level=3, model_size="trf", max_captions=None)
-    rareact = load_processed_dataset(
-        "rareact", level=3, model_size="trf", max_captions=None
-    )
-    # smsm = load_processed_dataset(
-    #     "smsm", level=3, model_size="trf", max_captions=None
-    # )
-    star = load_processed_dataset("star", level=3, model_size="trf", max_captions=None)
-    yc = load_processed_dataset("yc", level=3, model_size="trf", max_captions=None)
-
-    merged_dataset = [{}, {}, {}]
-    for data in [ikea, rareact, star, yc]:
-        for i, split in enumerate(data):
-            merged_dataset[i].update(split)
-
-    cos_mapping = load_cos_verbs("triggers/chatgpt_cos.csv", augment_it=True)
-    balance_dataset(merged_dataset, cos_mapping, delta=0.1)
+    cluster_around_cos()

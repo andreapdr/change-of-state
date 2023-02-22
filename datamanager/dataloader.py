@@ -419,3 +419,30 @@ def get_verb2cos(path="triggers/verb2cos_mapping.json"):
     with open(path) as f:
         verb2cos = json.load(f)
     return verb2cos
+
+
+def load_verblist():
+    import json
+    import os
+
+    coin = json.load(
+        open(os.path.join("output", "statistics", "coin", "all_actions_trf.json"))
+    )
+    ikea = json.load(
+        open(os.path.join("output", "statistics", "ikea", "all_actions_trf.json"))
+    )
+    rareact = json.load(
+        open(os.path.join("output", "statistics", "rareact", "all_actions_trf.json"))
+    )
+    smsm = json.load(
+        open(os.path.join("output", "statistics", "smsm", "all_actions_trf.json"))
+    )
+    star = json.load(
+        open(os.path.join("output", "statistics", "star", "all_actions_trf.json"))
+    )
+    yc = json.load(
+        open(os.path.join("output", "statistics", "yc", "all_actions_trf.json"))
+    )
+
+    merged = {**coin, **ikea, **rareact, **star, **smsm, **yc}
+    return list(set(merged.keys()))

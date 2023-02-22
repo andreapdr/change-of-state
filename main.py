@@ -30,17 +30,20 @@ from datamanager.dataloader import (
     load_processed_dataset,
     get_verb2cos,
 )
+from balance_data import cluster_around_cos
 
 from foiler import create_foils
 from parsing import phrasal_verb_recognizer, get_object_phrase, init_parser
 from exceptions import EXCEPTIONS as manual_exceptions
 from exceptions import EXCLUDED as manual_excluded
+from exceptions import MANUALLY_EXCLUDED_VERBS
 
 MODEL = "en_core_web_trf"
 nlp = init_parser(model=MODEL)
 
 
 def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
+    cluster_around_cos()  # build "triggers/verb2cos_mapping.json" from "triggers/mylist.csv"
     verb2cos_mapping = get_verb2cos()
     tinit = time()
     verbs = []
@@ -59,8 +62,10 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
         root = phrasal_verb_recognizer(parsed)
         verbs.append(root)
 
+        if root in MANUALLY_EXCLUDED_VERBS:
+            continue
+
         # manage some edge cases that we have manually checked
-        # TODO: we could move this except manager before the spacy parser to avoid some useless computation
         is_exception = False
         if v["sentence"] in manual_exceptions:
             is_exception = True
@@ -72,9 +77,7 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
         controlled_cos = verb2cos_mapping.get(root, None)
 
         if (
-            controlled_cos
-            in cos_verbs.keys()
-            # controlled_cos is not None
+            controlled_cos in cos_verbs.keys()
         ):  # TODO: cos_verbs list could be expanded with synonyms via wordnet
             v["verb"] = root
             v["verb-hypernym"] = controlled_cos
@@ -139,10 +142,7 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
         action_mapping, counter_actual_verbs, counter_reversed_action
     )
 
-    # TODO: remove this print
-    for k, v in to_sample.items():
-        if v > 0:
-            print(f"{k}: {v}")
+    return to_sample
 
 
 def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
@@ -255,6 +255,7 @@ def main(args):
             max_captions=args.max_captions,
         )
 
+    exit("- [DEVEL] Skipping balancing step!")
     if level <= 3:
         # TODO: balancing step should be carried out over all of the merged and filtered together ...
         if level == 3:
