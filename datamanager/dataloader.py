@@ -413,3 +413,9 @@ def load_processed_dataset(dataset_name, level, model_size, max_captions):
         with open(os.path.join(fdir, filepath)) as f:
             dataset.append(json.load(f))
     return dataset
+
+
+def get_verb2cos(path="triggers/verb2cos_mapping.json"):
+    with open(path) as f:
+        verb2cos = json.load(f)
+    return verb2cos

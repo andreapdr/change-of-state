@@ -67,7 +67,7 @@ def get_action_capt_and_foil(sentence):
     tag = "VBZ" if not is_plural(_object) else "VBP"
     _verb, _particle = inflect(sentence["verb"], tag=tag)
     _inverse, _particle_inv = inflect(sentence["state-inverse"], tag=tag)
-    _object = sentence["object"] if sentence["object"] else "Someone"
+    _object = sentence["object"] if sentence["object"] else "Something"
 
     if not_transitive(sentence["verb"]):
         capt = f"{_object.capitalize()} {_verb}{' ' + _particle if _particle else ''}."

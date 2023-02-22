@@ -1,0 +1,34 @@
+cos,pre,post,inv
+assemble,in pieces,whole,disassemble
+attach,separated,attached,detach
+clean,clean,dirty,stain
+close,open,closed,open
+combine,separated,combined,divide
+divde,combined,separated,combine
+cover,visible,hidden,uncover
+decrease,bigger,smaller,increase
+detach,attached,separated,attach
+disassemble,whole,in pieces,assemble
+drop,in a higher position,in a lower position,lift
+empty,full,empty,fill
+fall,in a higher position,in a lower position,raise
+fill,empty,full,empty
+fix,separated,attached,remove
+fold,unfolded,folded,unfold
+increase,smaller,bigger,decrease
+insert,outside,inside,pull out
+inflate,smaller,bigger,deflate
+lift,in a lower position,in a higher position,drop
+open,closed,open,close 
+pull,further away,closer,push
+pull out,inside,outside,insert
+push,closer,further away,pull
+raise,in a lower position,in a higher position,fall
+screw,loose,tight,unscrew
+stain,dirty,clean,stain
+substitute,older,newer,reinstall
+turn on,off,on,turn off
+turn off,on,off,turn on
+uncover,hidden,visible,cover
+unscrew,tight,loose,screw
+wrap,unwrapped,wrapper,unwrap

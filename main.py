@@ -28,6 +28,7 @@ from datamanager.dataloader import (
     load_original_dataset,
     save_dataset_splits,
     load_processed_dataset,
+    get_verb2cos,
 )
 
 from foiler import create_foils
@@ -40,6 +41,7 @@ nlp = init_parser(model=MODEL)
 
 
 def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
+    verb2cos_mapping = get_verb2cos()
     tinit = time()
     verbs = []
     filtered_dataset = {}
@@ -67,14 +69,19 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
             root = _manual["verb"]
             my_object = _manual["object"]
 
+        controlled_cos = verb2cos_mapping.get(root, None)
+
         if (
-            root in cos_verbs
+            controlled_cos
+            in cos_verbs.keys()
+            # controlled_cos is not None
         ):  # TODO: cos_verbs list could be expanded with synonyms via wordnet
             v["verb"] = root
+            v["verb-hypernym"] = controlled_cos
             v["object"] = get_object_phrase(parsed) if not is_exception else my_object
-            v["pre-state"] = cos_verbs[root]["pre-state"]
-            v["post-state"] = cos_verbs[root]["post-state"]
-            v["state-inverse"] = cos_verbs[root]["state-inverse"]
+            v["pre-state"] = cos_verbs[controlled_cos]["pre-state"]
+            v["post-state"] = cos_verbs[controlled_cos]["post-state"]
+            v["state-inverse"] = cos_verbs[controlled_cos]["state-inverse"]
             filtered_dataset[k] = v
             i += 1
     print(f"Time to filter: {(time() - tinit):.2f}s")
@@ -275,7 +282,7 @@ if __name__ == "__main__":
         "-c",
         "--cos_verbs",
         type=str,
-        default="triggers/chatgpt_cos.csv",
+        default="triggers/mylist.csv",
     )
     argparser.add_argument("-n", "--max_captions", type=int, default=None)
     argparser.add_argument("-m", "--model", type=str, default="en_core_web_trf")
