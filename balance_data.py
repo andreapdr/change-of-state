@@ -12,7 +12,6 @@ def cluster_around_cos():
     model = spacy.load("en_core_web_lg")
     cos = load_cos_verbs("triggers/mylist.csv")
     cos_list = list(model.pipe(list(cos.keys())))
-    # cos_str = [str(c) for c in cos_list]
     verbs = list(model.pipe(load_verblist()))
     word2cos = {}
     for verb in [
@@ -26,6 +25,7 @@ def cluster_around_cos():
     print("ok")
     with open("triggers/verb2cos_mapping.json", "w") as f:
         json.dump(word2cos, f)
+    return
 
 
 def postprocess_via_wn(verb, verb_constraint):

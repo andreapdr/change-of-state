@@ -1,9 +1,9 @@
 cos,pre,post,inv
 assemble,in pieces,whole,disassemble
-ascend,in a lower position,in a higher position, descend
+ascend,in a lower position,in a higher position,descend
 attach,separated,attached,detach
 collect,spread out,in the same position,spread
-clean,clean,dirty,stain
+clean,dirty,clean,stain
 close,open,closed,open
 combine,separated,combined,divide
 connect,detached,attached,disconnect
@@ -11,15 +11,19 @@ cut,whole,in pieces,connect
 descend,in a higher position,in a lower position,ascend
 disconnect,attched,detached,connect
 divide,combined,separated,combine
+dry,wet,dry,wet
 cover,visible,hidden,uncover
 decrease,bigger,smaller,increase
 detach,attached,separated,attach
 disassemble,whole,in pieces,assemble
 drop,in a higher position,in a lower position,lift
 empty,full,empty,fill
+fall,in a higher position,in a lower position,rise
 fill,empty,full,empty
 fix,separated,attached,remove
 fold,unfolded,folded,unfold
+heat up,cold,hot,heat down
+heat down,hot,cold,heat up
 increase,smaller,bigger,decrease
 insert,outside,inside,pull out
 inflate,smaller,bigger,deflate
@@ -29,14 +33,16 @@ pull,further away,closer,push
 pull out,inside,outside,insert
 put on,on,off,put off
 push,closer,further away,pull
-raise,in a lower position,in a
+raise,in a lower position,in a higher position,drop
+rise,in a lower position,in a higher position,fall
 remove,attached,separated,put on
 screw,loose,tight,unscrew
 spread,in the same position,spread out,collect
-stain,dirty,clean,stain
+stain,dirty,clean,clean
 substitute,older,newer,reinstall
 turn on,off,on,turn off
 turn off,on,off,turn on
 uncover,hidden,visible,cover
 unscrew,tight,loose,screw
+wet,dry,wet,dry
 wrap,unwrapped,wrapper,unwrap

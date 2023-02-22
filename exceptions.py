@@ -1,4 +1,6 @@
 EXCEPTIONS = {
+    "pour the soup in": {"verb": "fill", "object": "something"},
+    "pour bean paste into plate": {"verb": "fill", "object": "the plate"},
     "blend the phone": {"verb": "disassemble", "object": "the phone"},
     "fall to the ground": {"verb": "fall", "object": "the athlete"},
     "add butter, hot sauce, pepper, garlic powder, melted butter, and mix butter": {
@@ -17,6 +19,7 @@ EXCEPTIONS = {
         "verb": "whisk",
         "object": "the two eggs",
     },
+    "wipe screen again": {"verb": "wipe", "object": "the screen"},
     "boil the wrapped pierogies in boiling salted water": {
         "verb": "boil",
         "object": "the salted water",
@@ -93,7 +96,7 @@ EXCEPTIONS = {
         "object": "the wonton wrapper",
     },
     "pour some barbecue sauce on the meat loaf and bake the meatloaf": {
-        "verb": "pour",
+        "verb": "cover",
         "object": "the barbecue sauce",
     },
     "prepare and boil water": {"verb": "boil", "object": "the water"},
@@ -151,9 +154,9 @@ EXCEPTIONS = {
     "pour oil into the wok": {"verb": "fill", "object": "the wok"},
     "pour raw materials": {"verb": "fill", "object": "the bowl"},
     "pour the wax into the vessel": {"verb": "fill", "object": "the vessel"},
-    "pour the mixture on the meat loaf": {"verb": "pour", "object": "the mixture"},
+    "pour the mixture on the meat loaf": {"verb": "cover", "object": "the mixture"},
     "pour some oil into a hot pan": {"verb": "fill", "object": "the pan"},
-    "pour wine over the snails in a bowl": {"verb": "fill", "object": "the bowl"},
+    "pour wine over the snails in a bowl": {"verb": "cover", "object": "the bowl"},
     "pour the butter into the egg yolks": {
         "verb": "mix",
         "object": "the butter and egg yolks",
@@ -163,7 +166,7 @@ EXCEPTIONS = {
         "object": "the pan",
     },
     "pour the soup on bean sprouts and sprinkle parsley on top": {
-        "verb": "fill",
+        "verb": "cover",
         "object": "the bowl",
     },
     "pour the cooking oil into the wok and add curry powder": {
@@ -175,7 +178,7 @@ EXCEPTIONS = {
         "object": "the marinade and chicken",
     },
     "pour buttermilk and hot sauce on the chicken.": {
-        "verb": "mix",
+        "verb": "cover",
         "object": "the buttermilk, hot sauce and chicken",
     },
     "cut a certain length": {"verb": "cut", "object": "the cable"},
@@ -413,6 +416,9 @@ EXCLUDED = [
     """
   TODO: COS to remove: bake, 
   """
+    "invert seasoning",
+    "a little bit noodles",
+    "collect blood",
     "add tomato puree and cook until it starts to lose oil",
     "after cooking mix well to incorporate cheese and then bake",
     "bake it in the oven for 10 minutes and they are ready to serve",
@@ -587,6 +593,10 @@ MANUALLY_ALLOWED_VERBS = ["close", "open", "pour", "put", "take"]
 
 
 MANUALLY_EXCLUDED_VERBS = [
+    "cook",
+    "flip",
+    "fry",
+    "transfer",
     "weigh",
     "begin",
     "ketchup",
@@ -648,6 +658,7 @@ def hardcoded_verb_preprocessing(verb):
         "dig": "cover",
         "shred": "disassemble",
         "drain off": "empty",
+        "drain": "dry",
         "scrape": "disassemble",
         "peel off": "disassemble",
         "install back": "attach",
@@ -660,7 +671,6 @@ def hardcoded_verb_preprocessing(verb):
         "wipe off": "clean",
         "collect": "assemble",
         "shave": "disassemble",
-        "cut away": "disassemble",
         "wipe": "clean",
         "put": "insert",  # TODO: 'put into' is 'insert', otherwise...
         "stir": "combine",
@@ -676,12 +686,10 @@ def hardcoded_verb_preprocessing(verb):
         "remove": "detach",
         "pull up": "ascend",
         "pull down": "descend",
-        "put on": "combine",
+        "put on": "combine",  # TODO: maybe place on top of sm -> makes it higher - should also parse put on differently
         "put off": "remove",
         "install": "assemble",
         "uninstall": "disassemble",
-        "cut": "split",
-        "cut off": "split",
         "slice": "split",
         "wipe ip": "clean",
         "take off": "remove",
@@ -689,5 +697,13 @@ def hardcoded_verb_preprocessing(verb):
         "peel": "disassemble",
         "peel off": "disassemble",
         "pick up": "raise",
+        "cut off": "cut",
+        "cut away": "remove",
+        "chop": "cut",
+        "cut": "cut",
+        "freeze": "heat down",
+        "seal": "close",
+        "unseal": "open",
+        "sprinkle": "spread",
     }
     return verb2cos.get(verb, verb)

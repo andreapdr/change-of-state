@@ -2,6 +2,9 @@ from lemminflect import getInflection
 from exceptions import INTRANSITIVE
 
 
+# TODO: manage missing articles before nouns
+
+
 PTB_TAG = {
     "VB": "base form",
     "VBD": "past tense",
@@ -63,11 +66,10 @@ def create_foils(sentence, foil_types=["action"]):
 
 
 def get_action_capt_and_foil(sentence):
-    _object = sentence["object"] if sentence["object"] else "Someone"
+    _object = sentence["object"] if sentence["object"] else "something"
     tag = "VBZ" if not is_plural(_object) else "VBP"
     _verb, _particle = inflect(sentence["verb"], tag=tag)
     _inverse, _particle_inv = inflect(sentence["state-inverse"], tag=tag)
-    _object = sentence["object"] if sentence["object"] else "Something"
 
     if not_transitive(sentence["verb"]):
         capt = f"{_object.capitalize()} {_verb}{' ' + _particle if _particle else ''}."
@@ -107,7 +109,7 @@ def get_poststate_capt_and_foil(sentence):
 def get_inverse_capt_and_foil(sentence):
     _verb, _particle = inflect(sentence["verb"], tag="VBZ")
     _inverse, _particle_inv = inflect(sentence["state-inverse"], tag="VBZ")
-    _object = sentence["object"] if sentence["object"] else "someone"
+    _object = sentence["object"] if sentence["object"] else "something"
     aux = manage_aux(_object)
 
     if not_transitive(sentence["verb"]):

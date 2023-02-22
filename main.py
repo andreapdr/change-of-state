@@ -212,7 +212,7 @@ def main(args):
                 dataset_name=args.dataset,
                 level=level,
                 model_size=model_size,
-                max_captions=args.max_captions,
+                max_captions=None,
             )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
