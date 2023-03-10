@@ -1,6 +1,6 @@
 from lemminflect import getInflection
-from exceptions import INTRANSITIVE
 
+from manual_exceptions.intransitive_verbs import INTRANSITIVE
 
 # TODO: manage missing articles before nouns
 
@@ -69,14 +69,18 @@ def get_action_capt_and_foil(sentence):
     _object = sentence["object"] if sentence["object"] else "something"
     tag = "VBZ" if not is_plural(_object) else "VBP"
     _verb, _particle = inflect(sentence["verb"], tag=tag)
+    _verb_passive, _particle_passive = inflect(sentence["verb"], tag="VBZ")
     _inverse, _particle_inv = inflect(sentence["state-inverse"], tag=tag)
+    _inverse_passive, _particle_inv_passive = inflect(
+        sentence["state-inverse"], tag="VBZ"
+    )
 
     if not_transitive(sentence["verb"]):
         capt = f"{_object.capitalize()} {_verb}{' ' + _particle if _particle else ''}."
         foil = f"{_object.capitalize()} {_inverse}{' ' + _particle_inv if _particle_inv else ''}."
     else:
-        capt = f"Someone {_verb} {_object}{' ' + _particle if _particle else ''}."
-        foil = f"Someone {_inverse} {_object}{' ' +_particle_inv if _particle_inv else ''}."
+        capt = f"Someone {_verb_passive} {_object}{' ' + _particle_passive if _particle_passive else ''}."
+        foil = f"Someone {_inverse_passive} {_object}{' ' +_particle_inv_passive if _particle_inv_passive else ''}."
     return capt, foil
 
 
@@ -114,7 +118,7 @@ def get_inverse_capt_and_foil(sentence):
 
     if not_transitive(sentence["verb"]):
         capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, {_object} {_verb}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
-        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, {_object} {_inverse}{' ' + _particle if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
+        foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, {_object} {_inverse}{' ' + _particle_inv if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     else:
         capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, someone {_verb} {_object}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
         foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, someone {_inverse} {_object}{' ' + _particle_inv if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."

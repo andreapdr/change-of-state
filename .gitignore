@@ -177,3 +177,8 @@ cython_debug/
 # user defined
 output/*
 old/
+nohup.out
+old_resources
+run.sh
+tmp.py
+triggers/verb2cos_mapping.bu.json

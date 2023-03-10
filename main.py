@@ -4,7 +4,6 @@
 
 TODO: 1. balance out the true_caption/foiled_caption verb distribution [in progress]
 TODO: 2. ikea dataset caption parser to be improved
-TODO: 3. violin dataset
 
 1. Scan dataset for triggers:
     1.1. datasets have different formats: load the propietary data and convert to a common format
@@ -14,8 +13,8 @@ TODO: 3. violin dataset
 4. we could post-process the sentences with ChatGPT to make them more natural?
 """
 
-import os
 import json
+import os
 from argparse import ArgumentParser
 from collections import Counter
 from time import time
@@ -24,26 +23,24 @@ from tqdm import tqdm
 
 from datamanager.dataloader import (
     get_dataset_path,
+    get_verb2cos,
     load_cos_verbs,
     load_original_dataset,
-    save_dataset_splits,
     load_processed_dataset,
-    get_verb2cos,
+    save_dataset_splits,
 )
-from balance_data import cluster_around_cos
-
 from foiler import create_foils
-from parsing import phrasal_verb_recognizer, get_object_phrase, init_parser
-from exceptions import EXCEPTIONS as manual_exceptions
-from exceptions import EXCLUDED as manual_excluded
-from exceptions import MANUALLY_EXCLUDED_VERBS
+from manual_exceptions.exceptions import EXCEPTIONS as manual_exceptions
+from manual_exceptions.excluded_sents import EXCLUDED as manual_excluded
+from manual_exceptions.excluded_verbs import MANUALLY_EXCLUDED_VERBS
+from parsing import get_object_phrase, init_parser, phrasal_verb_recognizer
 
-MODEL = "en_core_web_trf"
+MODEL = "en_core_web_lg"
+# MODEL = "en_core_web_trf"
 nlp = init_parser(model=MODEL)
 
 
 def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
-    cluster_around_cos()  # build "triggers/verb2cos_mapping.json" from "triggers/mylist.csv"
     verb2cos_mapping = get_verb2cos()
     tinit = time()
     verbs = []
@@ -54,12 +51,16 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
             continue
         if i == max_captions:
             break
+
         # TODO: sometimes could be useful to add the subject "I" (e.g. in COIN dataset for sure)
         if add_subject:
             parsed = nlp(f'I {v["sentence"]}')
         else:
             parsed = nlp(v["sentence"])
         root = phrasal_verb_recognizer(parsed)
+
+        if root == "put":
+            root = "put in"
         verbs.append(root)
 
         if root in MANUALLY_EXCLUDED_VERBS:
@@ -119,63 +120,54 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
     Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
     """
     merged_splits = {k: v for d in dataset for k, v in d.items()}
-    counter_actual_verbs = Counter([v["verb"] for v in merged_splits.values()])
-    # TODO: the mapping is an Injective function - but we could have more cos verb mapping to multiple reverse verbs (use get_synonyms)
-    _reverse2action_mapping = {
-        v["state-inverse"]: k
-        for k, v in cos_verbs.items()
-        if k in counter_actual_verbs.keys()
-    }  # TODO: state-inverse key is not fully appropritate naming
-    counter_reversed_action = {
-        k: counter_actual_verbs.get(k, 0) for k in _reverse2action_mapping.keys()
-    }
+    hypernym_count = Counter([v["verb-hypernym"] for v in merged_splits.values()])
 
-    _action2reverse_mapping = {
-        k: cos_verbs[k]["state-inverse"] for k in counter_actual_verbs.keys()
-    }
-
-    action_mapping = {}
-    action_mapping.update(_reverse2action_mapping)
-    action_mapping.update(_action2reverse_mapping)
-
-    to_sample = _to_sample(
-        action_mapping, counter_actual_verbs, counter_reversed_action
-    )
-
-    return to_sample
+    sorted_hyp_keys = sorted(hypernym_count.keys())
+    visited = set()
+    for h in sorted_hyp_keys:
+        h_count = hypernym_count[h]
+        state_inverse = cos_verbs[h]["state-inverse"]
+        if h in visited:
+            continue
+        print(f"{h}: {h_count}\t{state_inverse}: {hypernym_count[state_inverse]}")
+        visited.add(state_inverse)
 
 
-def _to_sample(action_mapping, counter_actual_verbs, counter_reverse_action):
-    # TODO: this logic is a mess
-    to_sample = {}
-    for verb in action_mapping.keys():
-        reverse_verb = action_mapping[
-            verb
-        ]  # TODO: e.g., to dirty -> to wash but also to wash -> to stain / to dirty
-        actual_count = counter_actual_verbs[verb]
-        target_count = counter_reverse_action.get(reverse_verb, 0)
-        n_samples = min(actual_count, target_count)
-        to_sample[verb] = n_samples
-        to_sample[reverse_verb] = n_samples
-    return to_sample
+def _balance_via_hypernyms(count, mapping):
+    pass
 
 
-def save_actions_statistics(counter, c_filtered, dataset_name, model_size=None):
+def save_actions_statistics(
+    counter, c_filtered, dataset_name, model_size=None, max_captions=None
+):
     print(f"- Saving dataset action counts")
     fp = os.path.join("output", "statistics", dataset_name)
     os.makedirs(fp, exist_ok=True)
-    fp_all = os.path.join(
-        fp, f"all_actions_{model_size}.json" if model_size else f"all_actions.json"
+
+    filename = f"all_actions_{model_size}" if model_size else f"all_actions"
+    filename = (
+        f"{filename}.json"
+        if max_captions is None
+        else f"{filename}_{max_captions}.json"
     )
-    fp_filtered = os.path.join(
-        fp,
-        f"filtered_actions_{model_size}.json"
-        if model_size
-        else f"filtered_actions.json",
+
+    filenamefiltered = (
+        f"filtered_actions_{model_size}" if model_size else f"filtered_actions"
     )
+    filenamefiltered = (
+        f"{filenamefiltered}.json"
+        if max_captions is None
+        else f"{filenamefiltered}_{max_captions}.json"
+    )
+
+    fp_all = os.path.join(fp, filename)
+    fp_filtered = os.path.join(fp, filenamefiltered)
+
     with open(fp_all, "w") as f:
+        print(f"- saving dataset action statistics to: {fp_all}")
         json.dump(dict(counter.most_common()), f)
     with open(fp_filtered, "w") as f:
+        print(f"- saving filtrered dataset action statistics to: {fp_filtered}")
         json.dump(dict(c_filtered.most_common()), f)
     return
 
@@ -191,9 +183,7 @@ def main(args):
         f"- running pipeline: {['formatting', 'filtering', 'foiling', 'balancing'][level:]}"
     )
 
-    cos_mapping = load_cos_verbs(
-        args.cos_verbs, augment_it=args.augment
-    )  # TODO: data augmentation should be a pre-processing step to make sure that it makes sense!
+    cos_mapping = load_cos_verbs(args.cos_verbs, augment_it=args.augment)
 
     foil_types = ["action", "inverse"]  # TODO: hard-coded
 
@@ -203,7 +193,6 @@ def main(args):
             dataset=dataset,
             dataset_name=args.dataset,
             level="formatted",
-            model_size=model_size,
         )
 
     if level <= 1:
@@ -211,8 +200,6 @@ def main(args):
             dataset = load_processed_dataset(
                 dataset_name=args.dataset,
                 level=level,
-                model_size=model_size,
-                max_captions=None,
             )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
@@ -232,6 +219,7 @@ def main(args):
             counter_filtered,
             args.dataset,
             model_size=model_size,
+            max_captions=args.max_captions,
         )
 
     if level <= 2:
@@ -255,8 +243,8 @@ def main(args):
             max_captions=args.max_captions,
         )
 
-    exit("- [DEVEL] Skipping balancing step!")
     if level <= 3:
+        exit("Balancing should be carried out on all the datasets together")
         # TODO: balancing step should be carried out over all of the merged and filtered together ...
         if level == 3:
             filtered_dataset = load_processed_dataset(
@@ -265,6 +253,8 @@ def main(args):
                 model_size=model_size,
                 max_captions=args.max_captions,
             )
+
+        # balance_dataset(filtered_dataset, cos_mapping)
         balance_dataset(filtered_dataset, cos_mapping)
 
     exit()

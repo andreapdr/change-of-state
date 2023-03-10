@@ -1,6 +1,5 @@
 import json
 import os
-from itertools import chain
 
 import pandas as pd
 from nltk.corpus import wordnet as wn
@@ -369,48 +368,55 @@ def get_synonyms(verb, max_synonyms=10):
     return synonyms[:max_synonyms]
 
 
-def save_dataset_splits(dataset, dataset_name, level, model_size, max_captions=None):
+def save_dataset_splits(
+    dataset, dataset_name, level, model_size=None, max_captions=None
+):
     assert level in ["formatted", "filtered", "foiled"]
     for split, data in zip(["train", "val", "test"], dataset):
         save_dataset(
             dataset=data,
-            path=os.path.join("output", level, dataset_name),
+            save_dir=os.path.join("output", level, dataset_name),
             fname=dataset_name,
             split=split,
-            nrows=max_captions,
+            max_captions=max_captions,
             model_size=model_size,
         )
 
 
-def save_dataset(dataset, path, fname, split, nrows, model_size):
+def save_dataset(dataset, save_dir, fname, split, max_captions, model_size):
     """
     Save dataset to disk.
     """
-    path = os.path.expanduser(path)
-    os.makedirs(path, exist_ok=True)
-    path = os.path.join(path, fname)
-    filepath = (
-        f"{path}_{split}_{model_size}.json"
-        if nrows is None
-        else f"{path}_{split}_{model_size}_{nrows}.json"
+    save_dir = os.path.expanduser(save_dir)
+    os.makedirs(save_dir, exist_ok=True)
+    fname = (
+        f"{fname}_{split}" if model_size is None else f"{fname}_{split}_{model_size}"
     )
-    print(f"- Saving dataset to {filepath}")
-    with open(filepath, "w") as f:
+    fname = f"{fname}.json" if max_captions is None else f"{fname}_{max_captions}.json"
+    save_path = os.path.join(save_dir, fname)
+
+    print(f"- Saving dataset to {save_path}")
+    with open(save_path, "w") as f:
         json.dump(dataset, f)
 
 
-def load_processed_dataset(dataset_name, level, model_size, max_captions):
+def load_processed_dataset(dataset_name, level, model_size=None, max_captions=None):
     level_mapping = {1: "formatted", 2: "filtered", 3: "foiled"}
     fdir = os.path.join("output", level_mapping[level], dataset_name)
     print(f"- Loading dataset from {fdir}")
     dataset = []
     for split in ["train", "val", "test"]:
-        filepath = (
-            f"{dataset_name}_{split}_{model_size}.json"
-            if max_captions is None
-            else f"{dataset_name}_{split}_{model_size}_{max_captions}.json"
+        filename = (
+            f"{dataset_name}_{split}"
+            if model_size is None
+            else f"{dataset_name}_{split}_{model_size}"
         )
-        with open(os.path.join(fdir, filepath)) as f:
+        filename = (
+            f"{filename}.json"
+            if max_captions is None
+            else f"{filename}_{max_captions}.json"
+        )
+        with open(os.path.join(fdir, filename)) as f:
             dataset.append(json.load(f))
     return dataset
 
@@ -421,28 +427,21 @@ def get_verb2cos(path="triggers/verb2cos_mapping.json"):
     return verb2cos
 
 
-def load_verblist():
+def load_verblist(model_size="lg", n=None):
     import json
     import os
 
-    coin = json.load(
-        open(os.path.join("output", "statistics", "coin", "all_actions_trf.json"))
+    fname = (
+        f"all_actions_{model_size}.json"
+        if n is None
+        else f"all_actions_{model_size}_{n}.json"
     )
-    ikea = json.load(
-        open(os.path.join("output", "statistics", "ikea", "all_actions_trf.json"))
-    )
-    rareact = json.load(
-        open(os.path.join("output", "statistics", "rareact", "all_actions_trf.json"))
-    )
-    smsm = json.load(
-        open(os.path.join("output", "statistics", "smsm", "all_actions_trf.json"))
-    )
-    star = json.load(
-        open(os.path.join("output", "statistics", "star", "all_actions_trf.json"))
-    )
-    yc = json.load(
-        open(os.path.join("output", "statistics", "yc", "all_actions_trf.json"))
-    )
+    coin = json.load(open(os.path.join("output", "statistics", "coin", fname)))
+    ikea = json.load(open(os.path.join("output", "statistics", "ikea", fname)))
+    rareact = json.load(open(os.path.join("output", "statistics", "rareact", fname)))
+    smsm = json.load(open(os.path.join("output", "statistics", "smsm", fname)))
+    star = json.load(open(os.path.join("output", "statistics", "star", fname)))
+    yc = json.load(open(os.path.join("output", "statistics", "yc", fname)))
 
     merged = {**coin, **ikea, **rareact, **star, **smsm, **yc}
     return list(set(merged.keys()))

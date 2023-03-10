@@ -14,13 +14,14 @@ divide,combined,separated,combine
 dry,wet,dry,wet
 cover,visible,hidden,uncover
 decrease,bigger,smaller,increase
+deflate,bigger,smaller,inflate
 detach,attached,separated,attach
 disassemble,whole,in pieces,assemble
 drop,in a higher position,in a lower position,lift
 empty,full,empty,fill
 fall,in a higher position,in a lower position,rise
 fill,empty,full,empty
-fix,separated,attached,remove
+fix,separated,attached,detach
 fold,unfolded,folded,unfold
 heat up,cold,hot,heat down
 heat down,hot,cold,heat up
@@ -28,7 +29,7 @@ increase,smaller,bigger,decrease
 insert,outside,inside,pull out
 inflate,smaller,bigger,deflate
 lift,in a lower position,in a higher position,drop
-open,closed,open,close 
+open,closed,open,close
 pull,further away,closer,push
 pull out,inside,outside,insert
 put on,on,off,put off
@@ -39,10 +40,11 @@ remove,attached,separated,put on
 screw,loose,tight,unscrew
 spread,in the same position,spread out,collect
 stain,dirty,clean,clean
-substitute,older,newer,reinstall
 turn on,off,on,turn off
 turn off,on,off,turn on
 uncover,hidden,visible,cover
+unfold,folded,unfold,fold
 unscrew,tight,loose,screw
+unwrap,wrapped,unwrapped,wrap
 wet,dry,wet,dry
-wrap,unwrapped,wrapper,unwrap
+wrap,unwrapped,wrapped,unwrap
