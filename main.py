@@ -133,10 +133,6 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
         visited.add(state_inverse)
 
 
-def _balance_via_hypernyms(count, mapping):
-    pass
-
-
 def save_actions_statistics(
     counter, c_filtered, dataset_name, model_size=None, max_captions=None
 ):

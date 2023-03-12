@@ -118,7 +118,7 @@ EXCEPTIONS = {
         "object": "the front door of the printer",
     },
     "close the sluice and empty and disconnect the water pipe": {
-        "verb": "unplug",
+        "verb": "empty",
         "object": "the water pipe",
     },
     "combine the cheeses, mustard, paprika, and pepper in a small bowl": {
