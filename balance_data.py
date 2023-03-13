@@ -1,87 +1,11 @@
 import json
+import pandas as pd
+
 from collections import Counter, defaultdict
-
-import spacy
-from nltk.corpus import wordnet as wn
-
-from datamanager.dataloader import load_cos_verbs, load_processed_dataset, load_verblist
-
-from manual_exceptions.forced_allowed_verbs import MANUALLY_ALLOWED_VERBS
-from manual_exceptions.excluded_verbs import MANUALLY_EXCLUDED_VERBS
-from manual_exceptions.manual_verb2cos import hardcoded_verb_preprocessing
+from datamanager.dataloader import load_cos_verbs, load_processed_dataset
 
 
-def cluster_around_cos(model, max_captions=None):
-    model_size = model.split("_")[-1]
-    model = spacy.load(model)
-    cos = load_cos_verbs("triggers/mylist.csv")
-    cos_list = list(model.pipe(list(cos.keys())))
-    verbs = list(model.pipe(load_verblist(model_size=model_size, n=max_captions)))
-    word2cos = {}
-    for verb in [
-        v
-        for v in verbs
-        if v[0].pos_ == "VERB" and str(v) not in MANUALLY_EXCLUDED_VERBS
-    ]:
-        _verb = hardcoded_verb_preprocessing(str(verb))
-        top_cos = get_top_similar(model, _verb, cos_list, 1, threshold=0.3)
-        word2cos[str(verb)] = top_cos[0] if len(top_cos) > 0 else str(verb)
-    with open("triggers/verb2cos_mapping.json", "w") as f:
-        json.dump(dict(sorted(word2cos.items())), f)
-    return
-
-
-def postprocess_via_wn(verb, verb_constraint):
-    # TODO: wordnet does not seem to manage well pharasal verbs
-    verb = str(verb).split(" ")[0]
-    verb_synonyms = _get_wn_synonyms(verb)
-    verb_antonyms = _get_wn_antonyms(verb)
-    if verb_constraint is not None:
-        verb_synonyms = [s for s in verb_synonyms if s in verb_constraint]
-        verb_antonyms = [s for s in verb_antonyms if s in verb_constraint]
-    return verb_synonyms, verb_antonyms
-
-
-def get_top_similar(model, word, candidates, k, check_pos=True, threshold=0.5):
-    _word = model(word)
-    if check_pos:
-        sims = [
-            (str(word), str(c), _word.similarity(c))
-            # for c in candidates
-            # if c[0].pos_ == "VERB" or c[0].orth_ in ["close", "unwrap", "break", "empty"]
-            for c in candidates
-            if (c[0] != _word[0] and c[0].pos_ == "VERB")
-            or c[0].orth_ in ["close", "unwrap", "break", "empty"]
-        ]
-    else:
-        sims = [(str(word), str(c), _word.similarity(c[0])) for c in candidates]
-    sims.sort(key=lambda x: x[2], reverse=True)
-    sims = [s[1] for s in sims if s[2] >= threshold]
-    return sims[:k]
-
-
-def _get_wn_antonyms(word):
-    antonyms = []
-    for syn in wn.synsets(word, pos=wn.VERB):
-        for l in syn.lemmas():
-            if l.antonyms():
-                antonyms.append(l.antonyms()[0].name())
-    return sorted([a.replace("_", " ") for a in set(antonyms)])
-
-
-def _get_wn_synonyms(word):
-    synonyms = [
-        sorted(list(set(ss.lemma_names(lang="eng")) - {word}))
-        for ss in wn.synsets(word, lang="eng", pos=wn.VERB)
-    ]
-    synonyms = sorted(list(set(sum(synonyms, []))))
-    return [s.replace("_", " ") for s in synonyms]
-
-
-def balance_dataset(dataset, cos_verbs, delta=0.1):
-    """
-    Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
-    """
+def get_balanced_verb_distribution(dataset, cos_verbs, delta=0.1):
     merged_splits = {k: v for d in dataset for k, v in d.items()}
     hypernym_count = Counter([v["verb-hypernym"] for v in merged_splits.values()])
 
@@ -108,7 +32,7 @@ def balance_dataset(dataset, cos_verbs, delta=0.1):
         visited.add(state_inverse)
 
 
-def old_balance_dataset(dataset, cos_verbs, delta=0.1):
+def balance_dataset(dataset, cos_verbs, delta=0.1, max_verbs=50, verbose=False):
     """
     Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
     """
@@ -116,24 +40,76 @@ def old_balance_dataset(dataset, cos_verbs, delta=0.1):
     hypernym_count = Counter([v["verb-hypernym"] for v in merged_splits.values()])
 
     sorted_hyp_keys = sorted(hypernym_count.keys())
+    balanced = []
     visited = set()
+    min_sum = 0
     for h in sorted_hyp_keys:
         h_count = hypernym_count[h]
         state_inverse = cos_verbs[h]["state-inverse"]
+        reverse_h_count = hypernym_count[state_inverse]
         if h in visited:
             continue
-        print(f"{h}: {h_count}\t{state_inverse}: {hypernym_count[state_inverse]}")
+        if verbose:
+            print(f"{h}: {h_count}\t{state_inverse}: {reverse_h_count}")
         visited.add(state_inverse)
+        _min_count = min(h_count, reverse_h_count)
+        _min_count = _min_count if _min_count < max_verbs else max_verbs
+        min_sum += _min_count
+        if _min_count == 0:
+            continue
+        balanced.append({"verb": h, "reverse": state_inverse, "count": _min_count})
+    if verbose:
+        print(min_sum)
+        for elem in balanced:
+            print(elem)
+    with open("output/statistics/balanced_verbs.json", "w") as f:
+        json.dump(balanced, f)
+    return balanced
+
+
+def sample_balanced(dataset, balanced, seed=42):
+    merged_splits = {k: v for d in dataset for k, v in d.items()}
+    sampled = {}
+    keys = []
+    hypernyms = []
+    for k, v in merged_splits.items():
+        keys.append(k)
+        hypernyms.append(v["verb-hypernym"])
+
+    df = pd.DataFrame({"key": keys, "hypernym": hypernyms})
+
+    for verb_pair in balanced:
+        verb = verb_pair["verb"]
+        reverse = verb_pair["reverse"]
+        count = verb_pair["count"]
+
+        verb_df = df[df["hypernym"] == verb]
+        reverse_df = df[df["hypernym"] == reverse]
+
+        sampled_keys = list(verb_df["key"].sample(count, random_state=seed)) + list(
+            reverse_df["key"].sample(count, random_state=seed)
+        )
+
+        sampled.update({k: merged_splits[k] for k in sampled_keys})
+
+    with open("output/final/balanced_data.json", "w") as f:
+        json.dump(sampled, f)
+
+    print("- done")
 
 
 if __name__ == "__main__":
-    # cluster_around_cos(model="en_core_web_lg", max_captions=None)
-    # exit()
     datasets = ["coin", "ikea", "rareact", "smsm", "star", "yc"]
     loaded = [
         load_processed_dataset(d, level=3, model_size="lg", max_captions=None)
         for d in datasets
     ]
+
+    for d, d_name in zip(loaded, datasets):
+        for i, split in enumerate(["train", "val", "test"]):
+            for k, v in d[i].items():
+                v.update({"dataset_name": d_name, "original_split": split})
+
     _train = {}
     _val = {}
     _test = {}
@@ -142,5 +118,9 @@ if __name__ == "__main__":
         _val.update(d[1])
         _test.update(d[2])
 
-    # balance_dataset([_train, _val, _test], load_cos_verbs("triggers/mylist.csv"))
-    old_balance_dataset([_train, _val, _test], load_cos_verbs("triggers/mylist.csv"))
+    # get_balanced_verb_distribution([_train, _val, _test], load_cos_verbs("triggers/mylist.csv"))
+
+    balanced = balance_dataset(
+        [_train, _val, _test], load_cos_verbs("triggers/mylist.csv")
+    )
+    sample_balanced([_train, _val, _test], balanced)

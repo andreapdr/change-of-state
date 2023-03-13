@@ -21,13 +21,21 @@ def phrasal_verb_recognizer(parsed):
     return root
 
 
+def _postprocess_articles(obj):
+    _obj = obj.lower()
+    _obj = obj.split(" ")
+    if _obj[0] not in ["a", "an", "the", "some"]:
+        obj = "the " + obj
+    return obj
+
+
 def get_object_phrase(parsed):
     for token in parsed:
         if "dobj" in token.dep_:
             subtree = list(token.subtree)
             start = subtree[0].i
             end = subtree[-1].i + 1
-            return parsed[start:end].orth_
+            return _postprocess_articles(parsed[start:end].orth_)
 
 
 def get_dative_phrase(parsed):

@@ -1,4 +1,5 @@
 MANUALLY_EXCLUDED_VERBS = [
+    "apply",
     "finish",
     "melt",
     "serve",
@@ -11,6 +12,7 @@ MANUALLY_EXCLUDED_VERBS = [
     "bear",
     "bent",
     "rod",
+    "eat",
     "saute",
     "scissor",
     "sift",

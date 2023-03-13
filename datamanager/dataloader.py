@@ -41,10 +41,20 @@ def load_star_dataset(path):
             entry = {
                 "sentence": elem["question"],
                 "video_id": elem["video_id"],
-                "object": elem["answer"],
+                "object": elem["answer"].lower().rstrip("."),
                 "timestamp": [elem["start"], elem["end"]],
                 "split": split,
             }
+            # we discard all of the sentences that do not start with "Which"
+            if entry["sentence"].split(" ")[0] != "Which":
+                continue
+
+            _adverb = list(
+                set(entry["sentence"].split(" ")).intersection(set(("before", "after")))
+            )
+            if len(_adverb) > 0:
+                sent = entry["sentence"].split(_adverb[0])[0].rstrip() + "?"
+                entry["sentence"] = sent
             if split == "train":
                 train[elem["question_id"]] = entry
             elif split == "val":

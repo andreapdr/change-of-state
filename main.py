@@ -82,7 +82,11 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
         ):  # TODO: cos_verbs list could be expanded with synonyms via wordnet
             v["verb"] = root
             v["verb-hypernym"] = controlled_cos
-            v["object"] = get_object_phrase(parsed) if not is_exception else my_object
+            has_obj = v.get("object", None)
+            if has_obj is None:
+                v["object"] = (
+                    get_object_phrase(parsed) if not is_exception else my_object
+                )
             v["pre-state"] = cos_verbs[controlled_cos]["pre-state"]
             v["post-state"] = cos_verbs[controlled_cos]["post-state"]
             v["state-inverse"] = cos_verbs[controlled_cos]["state-inverse"]
@@ -181,7 +185,7 @@ def main(args):
 
     cos_mapping = load_cos_verbs(args.cos_verbs, augment_it=args.augment)
 
-    foil_types = ["action", "inverse"]  # TODO: hard-coded
+    foil_types = ["action", "pre-state", "post-state", "inverse"]  # TODO: hard-coded
 
     if level == 0:
         dataset = load_original_dataset(get_dataset_path(args.dataset))
