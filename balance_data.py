@@ -37,7 +37,9 @@ def balance_dataset(dataset, cos_verbs, delta=0.1, max_verbs=50, verbose=False):
     Balance dataset to contain approximately (delta) same number distribution of cos verbs in the true_caption and foiled_caption.
     """
     merged_splits = {k: v for d in dataset for k, v in d.items()}
-    hypernym_count = Counter([v["verb-hypernym"] for v in merged_splits.values()])
+    hypernym_count = Counter(
+        [v["change_of_state"]["verb-hypernym"] for v in merged_splits.values()]
+    )
 
     sorted_hyp_keys = sorted(hypernym_count.keys())
     balanced = []
@@ -74,7 +76,7 @@ def sample_balanced(dataset, balanced, seed=42):
     hypernyms = []
     for k, v in merged_splits.items():
         keys.append(k)
-        hypernyms.append(v["verb-hypernym"])
+        hypernyms.append(v["change_of_state"]["verb-hypernym"])
 
     df = pd.DataFrame({"key": keys, "hypernym": hypernyms})
     _c = 0
