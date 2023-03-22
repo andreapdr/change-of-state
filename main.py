@@ -40,7 +40,20 @@ MODEL = "en_core_web_lg"
 nlp = init_parser(model=MODEL)
 
 
-def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
+def quickfilter_smsm(sent):
+    lookfor_putting = ["next", "front"]
+    lookfor_turning = ["right", "left", "upside down", "downwards", "upwards"]
+    if "putting" in sent and any(w in sent for w in lookfor_putting):
+        return True
+    elif "turning" in sent and any(w in sent for w in lookfor_turning):
+        return True
+    else:
+        return False
+
+
+def filter_captions(
+    captions, cos_verbs, add_subject=False, max_captions=None, dataset_name=None
+):
     verb2cos_mapping = get_verb2cos()
     tinit = time()
     verbs = []
@@ -49,12 +62,23 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
     for k, v in tqdm(captions.items()):
         if v["sentence"] in manual_excluded:
             continue
+        if quickfilter_smsm(
+            v["sentence"]
+        ):  # hard-coded rule form SMSM sent like "putting smt next to smt"
+            continue
         if i == max_captions:
             break
 
         # TODO: sometimes could be useful to add the subject "I" (e.g. in COIN dataset for sure)
         if add_subject:
             parsed = nlp(f'I {v["sentence"]}')
+        elif dataset_name == "smsm":
+            from lemminflect import getInflection, getLemma
+
+            main_smsm_verb = v["sentence"].split(" ")[0]
+            _simple_verb = getLemma(main_smsm_verb, "VERB")[0]
+            _simple_sent = v["sentence"].replace(main_smsm_verb, f"I {_simple_verb}")
+            parsed = nlp(_simple_sent)
         else:
             parsed = nlp(v["sentence"])
         root = phrasal_verb_recognizer(parsed)
@@ -80,18 +104,48 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
         if (
             controlled_cos in cos_verbs.keys()
         ):  # TODO: cos_verbs list could be expanded with synonyms via wordnet
-            v["verb"] = root
-            v["verb-hypernym"] = controlled_cos
+            v["change_of_state"] = {}
+            v["change_of_state"]["verb"] = root
+            v["change_of_state"]["verb-hypernym"] = controlled_cos
             has_obj = v.get("object", None)
             if has_obj is None:
-                v["object"] = (
+                v["change_of_state"]["object"] = (
                     get_object_phrase(parsed) if not is_exception else my_object
                 )
-            v["pre-state"] = cos_verbs[controlled_cos]["pre-state"]
-            v["post-state"] = cos_verbs[controlled_cos]["post-state"]
-            v["state-inverse"] = cos_verbs[controlled_cos]["state-inverse"]
+            else:
+                v["change_of_state"]["object"] = v["object"]
+                v.pop("object")
+            v["change_of_state"]["pre-state"] = cos_verbs[controlled_cos]["pre-state"]
+            v["change_of_state"]["post-state"] = cos_verbs[controlled_cos]["post-state"]
+            v["change_of_state"]["state-inverse"] = cos_verbs[controlled_cos][
+                "state-inverse"
+            ]
+
+            v["dataset"] = dataset_name
+            v["start_time"] = v["timestamp"][0]
+            v["end_time"] = v["timestamp"][1]
+            v["time_unit"] = "sec"
+
             filtered_dataset[k] = v
+
+            if dataset_name in ["coin", "rareact", "yc"]:
+                v["youtube_id"] = standardize_video_id(v["video_id"])
+                v["video_file"] = None
+
+            elif dataset_name in ["ikea", "smsm", "star"]:
+                v["youtube_id"] = None
+                v["video_file"] = v["video_id"]
+
+            v.pop("video_id")
+            v.pop("timestamp")
+
+            # if dataset_name in ["rareact", "star"]:
+            #     v["video-id"] = v["video_id"]
+            # else:
+            #     v["video-id"] = v["top_level_key"]
+
             i += 1
+
     print(f"Time to filter: {(time() - tinit):.2f}s")
     c = Counter(verbs)
     filtered = [v for v in verbs if v in cos_verbs]
@@ -99,7 +153,17 @@ def filter_captions(captions, cos_verbs, add_subject=False, max_captions=None):
     return filtered_dataset, c, c_filtered
 
 
-def filter_dataset(dataset, cos_verbs, max_captions=None):
+def standardize_video_id(video_id):
+    if ".com/embed/" in video_id:
+        video_id = video_id.replace("https://www.youtube.com/embed/", "")
+    elif ".com/watch?v=" in video_id:
+        video_id = video_id.replace("https://www.youtube.com/watch?v=", "")
+    else:
+        pass
+    return video_id
+
+
+def filter_dataset(dataset, cos_verbs, max_captions=None, dataset_name=None):
     """
     Filter dataset to contain only captions with change-of-state verbs.
     """
@@ -108,7 +172,11 @@ def filter_dataset(dataset, cos_verbs, max_captions=None):
         print(f"- Filtering {str_split}...")
         if len(split) != 0:
             _filtered_dataset, counter, c_filtered = filter_captions(
-                split, cos_verbs=cos_verbs, max_captions=max_captions, add_subject=False
+                split,
+                cos_verbs=cos_verbs,
+                max_captions=max_captions,
+                add_subject=False,
+                dataset_name=dataset_name,
             )
         else:
             _filtered_dataset = {}
@@ -203,7 +271,10 @@ def main(args):
             )
 
         filtered_dataset, counter_all_actions, counter_filtered = filter_dataset(
-            dataset, cos_mapping, max_captions=args.max_captions
+            dataset,
+            cos_mapping,
+            max_captions=args.max_captions,
+            dataset_name=args.dataset,
         )
 
         save_dataset_splits(
@@ -233,7 +304,9 @@ def main(args):
         print(f"- Foiling types: {foil_types}")
         for i in range(len(filtered_dataset)):
             for k, v in filtered_dataset[i].items():
-                filtered_dataset[i][k].update(create_foils(v, foil_types=foil_types))
+                filtered_dataset[i][k].update(
+                    create_foils(v["change_of_state"], foil_types=foil_types)
+                )
 
         save_dataset_splits(
             dataset=filtered_dataset,

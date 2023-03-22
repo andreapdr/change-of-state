@@ -43,7 +43,7 @@ def load_star_dataset(path):
                 "video_id": elem["video_id"],
                 "object": elem["answer"].lower().rstrip("."),
                 "timestamp": [elem["start"], elem["end"]],
-                "split": split,
+                "original_split": split,
             }
             # we discard all of the sentences that do not start with "Which"
             if entry["sentence"].split(" ")[0] != "Which":
@@ -137,7 +137,7 @@ def _unfold_ikea_entry(key, entry):
             "sentence": annotation["label"],
             "timestamp": annotation["segment"],
             "video_id": key,
-            "split": entry["subset"],
+            "original_split": entry["subset"],
         }
     return unfolded
 
@@ -165,7 +165,7 @@ def load_rareact(path):
             "sentence": _create_sentence_rareact(row.verb, row.noun),
             "timestamp": [row.start, row.end],
             "video_id": row.video_id,
-            "split": "training",
+            "original_split": "training",
         }
     return (train, val, test)
 
@@ -203,7 +203,7 @@ def _unfold_coin_entry(key, entry):
             "sentence": annotation["label"],
             "timestamp": annotation["segment"],
             "video_id": entry["video_url"],
-            "split": entry["subset"],
+            "original_split": entry["subset"],
         }
     return unfolded
 
@@ -277,8 +277,16 @@ def _unfold_smsm_entry(key, entry, split):
         "sentence": entry["label"],
         "timestamp": [None, None],
         "video_id": entry["id"],
-        "split": split,
+        "original_split": split,
     }
+
+    if "falling like a" in new_entry["sentence"]:
+        dets = ["the ", "a ", "some ", "an "]
+        _obj = new_entry["sentence"].split("falling like a")[0].rstrip()
+        if not any(w in _obj.lower() for w in dets):
+            _obj = "the " + _obj
+        new_entry["object"] = _obj
+
     return new_entry
 
 
@@ -294,7 +302,7 @@ def _unfold_yc_entry(key, entry):
             "sentence": segment["sentence"],
             "timestamp": segment["segment"],
             "video_id": entry["video_url"],
-            "split": entry["subset"],
+            "original_split": entry["subset"],
         }
     return new_entry
 
