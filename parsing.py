@@ -24,7 +24,7 @@ def phrasal_verb_recognizer(parsed):
 def _postprocess_articles(obj):
     _obj = obj.lower()
     _obj = obj.split(" ")
-    if _obj[0] not in ["a", "an", "the", "some"]:
+    if _obj[0] not in ["a", "an", "the", "some", "one"]:
         obj = "the " + obj
     return obj
 

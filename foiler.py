@@ -37,6 +37,8 @@ def not_transitive(verb):
 
 def is_plural(subject):
     if subject[-1] == "s" or "and" in subject:
+        if subject[-2] == "s":  # e.g., "glass"
+            return False
         return True
     else:
         return False

@@ -77,7 +77,7 @@ def sample_balanced(dataset, balanced, seed=42):
         hypernyms.append(v["verb-hypernym"])
 
     df = pd.DataFrame({"key": keys, "hypernym": hypernyms})
-
+    _c = 0
     for verb_pair in balanced:
         verb = verb_pair["verb"]
         reverse = verb_pair["reverse"]
@@ -90,12 +90,16 @@ def sample_balanced(dataset, balanced, seed=42):
             reverse_df["key"].sample(count, random_state=seed)
         )
 
-        sampled.update({k: merged_splits[k] for k in sampled_keys})
+        for sampled_k in sampled_keys:
+            sampled[_c] = merged_splits[sampled_k]
+            _c += 1
+
+        # sampled.update({k: merged_splits[k] for k in sampled_keys})
 
     with open("output/final/balanced_data.json", "w") as f:
         json.dump(sampled, f)
 
-    print("- done")
+    print(f"- done! Sampled: {_c} items")
 
 
 if __name__ == "__main__":
@@ -108,7 +112,8 @@ if __name__ == "__main__":
     for d, d_name in zip(loaded, datasets):
         for i, split in enumerate(["train", "val", "test"]):
             for k, v in d[i].items():
-                v.update({"dataset_name": d_name, "original_split": split})
+                # v.update({"dataset": d_name, "original_split": split})
+                v.update({"original_split": split})
 
     _train = {}
     _val = {}
@@ -121,6 +126,6 @@ if __name__ == "__main__":
     # get_balanced_verb_distribution([_train, _val, _test], load_cos_verbs("triggers/mylist.csv"))
 
     balanced = balance_dataset(
-        [_train, _val, _test], load_cos_verbs("triggers/mylist.csv")
+        [_train, _val, _test], load_cos_verbs("triggers/mylist.csv"), max_verbs=25
     )
     sample_balanced([_train, _val, _test], balanced)
