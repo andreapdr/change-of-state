@@ -18,6 +18,7 @@ import os
 from argparse import ArgumentParser
 from collections import Counter
 from time import time
+from pytube import YouTube
 
 from tqdm import tqdm
 
@@ -126,23 +127,20 @@ def filter_captions(
             v["end_time"] = v["timestamp"][1]
             v["time_unit"] = "sec"
 
-            filtered_dataset[k] = v
-
             if dataset_name in ["coin", "rareact", "yc"]:
                 v["youtube_id"] = standardize_video_id(v["video_id"])
                 v["video_file"] = None
+                if not check_availability(v["youtube_id"]):
+                    continue
 
             elif dataset_name in ["ikea", "smsm", "star"]:
                 v["youtube_id"] = None
                 v["video_file"] = v["video_id"]
 
+            filtered_dataset[k] = v
+
             v.pop("video_id")
             v.pop("timestamp")
-
-            # if dataset_name in ["rareact", "star"]:
-            #     v["video-id"] = v["video_id"]
-            # else:
-            #     v["video-id"] = v["top_level_key"]
 
             i += 1
 
@@ -151,6 +149,15 @@ def filter_captions(
     filtered = [v for v in verbs if v in cos_verbs]
     c_filtered = Counter(filtered)
     return filtered_dataset, c, c_filtered
+
+
+def check_availability(youtube_id):
+    yt = YouTube(f"https://www.youtube.com/watch?v={youtube_id}")
+    try:
+        yt.check_availability()
+    except:
+        return False
+    return True
 
 
 def standardize_video_id(video_id):
