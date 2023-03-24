@@ -162,6 +162,7 @@ def load_rareact(path):
     # convert df to dict of dict
     for i, row in df.iterrows():
         train[row["id"]] = {
+            "top_level_key": row.id,
             "sentence": _create_sentence_rareact(row.verb, row.noun),
             "timestamp": [row.start, row.end],
             "video_id": row.video_id,
