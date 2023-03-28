@@ -39,6 +39,7 @@ def load_star_dataset(path):
         print(f"- split: {split} has len: {len(data)}")
         for elem in data:
             entry = {
+                "top_level_key": elem["question_id"],
                 "sentence": elem["question"],
                 "video_id": elem["video_id"],
                 "object": elem["answer"].lower().rstrip("."),
@@ -136,7 +137,7 @@ def _unfold_ikea_entry(key, entry):
             "annotation_id": new_key,
             "sentence": annotation["label"],
             "timestamp": annotation["segment"],
-            "video_id": key,
+            "video_id": key.replace("/", "_"),
             "original_split": entry["subset"],
         }
     return unfolded
@@ -162,7 +163,7 @@ def load_rareact(path):
     # convert df to dict of dict
     for i, row in df.iterrows():
         train[row["id"]] = {
-            "top_level_key": row.id,
+            "top_level_key": str(row.id),
             "sentence": _create_sentence_rareact(row.verb, row.noun),
             "timestamp": [row.start, row.end],
             "video_id": row.video_id,
