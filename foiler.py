@@ -40,6 +40,8 @@ def is_plural(subject):
         if subject[-2] == "s":  # e.g., "glass"
             return False
         return True
+    elif " and " in subject:
+        return True
     else:
         return False
 
