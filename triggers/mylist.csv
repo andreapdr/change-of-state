@@ -23,8 +23,8 @@ fall,in a higher position,in a lower position,rise
 fill,empty,full,empty
 fix,separated,attached,detach
 fold,unfolded,folded,unfold
-heat up,cold,hot,heat down
-heat down,hot,cold,heat up
+heat up,cold,hot,cool down
+cool down,hot,cold,heat up
 increase,smaller,bigger,decrease
 insert,outside,inside,pull out
 inflate,smaller,bigger,deflate
