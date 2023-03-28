@@ -93,6 +93,8 @@ def sample_balanced(dataset, balanced, seed=42):
         )
 
         for sampled_k in sampled_keys:
+            if merged_splits[sampled_k]["youtube_id"] == "0zTDNBPN-3I":
+                continue
             sampled[_c] = merged_splits[sampled_k]
             _c += 1
 
@@ -128,6 +130,6 @@ if __name__ == "__main__":
     # get_balanced_verb_distribution([_train, _val, _test], load_cos_verbs("triggers/mylist.csv"))
 
     balanced = balance_dataset(
-        [_train, _val, _test], load_cos_verbs("triggers/mylist.csv"), max_verbs=25
+        [_train, _val, _test], load_cos_verbs("triggers/mylist.csv"), max_verbs=20
     )
     sample_balanced([_train, _val, _test], balanced)

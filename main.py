@@ -52,6 +52,19 @@ def quickfilter_smsm(sent):
         return False
 
 
+def _stored_video(dataset, video_id, video_path="~/datasets/vl-bench/videos/"):
+    video_id = standardize_video_id(video_id)
+    video_path = os.path.join(os.path.expanduser(video_path), video_id)
+    if dataset == "smsm":
+        video_path += ".webm"
+    elif dataset == "ikea":
+        video_path += ".avi"
+    else:
+        video_path += ".mp4"
+    if os.path.exists(video_path):
+        return True
+
+
 def filter_captions(
     captions, cos_verbs, add_subject=False, max_captions=None, dataset_name=None
 ):
@@ -63,6 +76,11 @@ def filter_captions(
     for k, v in tqdm(captions.items()):
         if v["sentence"] in manual_excluded:
             continue
+
+        # TODO: we can filter out sentences for which we do not ha\ve already downloaded a video to speed up the process
+        if not _stored_video(dataset_name, v["video_id"]):
+            continue
+
         if quickfilter_smsm(
             v["sentence"]
         ):  # hard-coded rule form SMSM sent like "putting smt next to smt"
@@ -152,6 +170,10 @@ def filter_captions(
 
 
 def check_availability(youtube_id):
+    _fn = f"{youtube_id}.mp4"
+    video_dir = os.path.expanduser("~/datasets/vl-bench/videos/")
+    if os.path.exists(os.path.join(video_dir, _fn)):
+        return True
     yt = YouTube(f"https://www.youtube.com/watch?v={youtube_id}")
     try:
         yt.check_availability()
