@@ -25,7 +25,7 @@ EXCEPTIONS = {
     "pour the egg into the bowl": {"verb": "fill", "object": "the bowl"},
     "remove the light shell/housing/support": {"verb": "remove", "object": "the light"},
     "mix everything well in the bowl": {"verb": "mix", "object": "the ingredients"},
-    "tkae out the quilt cover from antoher side": {
+    "take out the quilt cover from antoher side": {
         "verb": "take out",
         "object": "the quilt cover",
     },
@@ -205,6 +205,10 @@ EXCEPTIONS = {
         "verb": "mix",
         "object": "the spaghetti",
     },
+    "drizzle some oil on top some bread and heat them in a pan": {
+        "verb": "wet",
+        "object": "the bread",
+    },
     "drizzle the dressing on the salad and toss to combine": {
         "verb": "mix",
         "object": "the dressing and the salad",
@@ -214,7 +218,7 @@ EXCEPTIONS = {
         "object": "the taco shells",
     },
     "fill the tree into the pit": {"verb": "fill", "object": "the pit"},
-    "fix the wind mill on the bracket": {"verb": "fix", "object": "the windmill"},
+    "fix the wind mill on the bracket": {"verb": "fix", "object": "the wind mill"},
     "heat the teapot and wash the cup": {"verb": "wash", "object": "the cup"},
     "melt the wax with water": {"verb": "melt", "object": "the wax"},
     "mix 3 tsps of corn starch with water": {
@@ -393,10 +397,19 @@ EXCEPTIONS = {
         "verb": "mix",
         "object": "the marinade and chicken",
     },
+    "use a knife to burst air pockets": {
+        "verb": "deflate",
+        "object": "the air pockets",
+    },
     "pour buttermilk and hot sauce on the chicken.": {
         "verb": "cover",
         "object": "the buttermilk, hot sauce and chicken",
     },
+    "pouring water into cup until it overflows": {
+        "verb": "fill",
+        "object": "the cup",
+    },
+    "lie down front panel": {"verb": "drop", "object": "the front panel"},
     "cut a certain length": {"verb": "cut", "object": "the cable"},
     "add some lemon grass, fish sauce, sugar, salt, chicken powder, chilli flakes, and stir it to combine": {
         "verb": "combine",
@@ -688,4 +701,97 @@ EXCEPTIONS = {
         "object": "the cake, flour, and sugar",
     },
     "mix the bowl well with a whisk": {"verb": "mix", "object": "the ingredients"},
+    "mix some cornflour and water and add the mixture to the soup": {
+        "verb": "mix",
+        "object": "the cornflour and water",
+    },
+    "pat escargot dry and place on mat": {"verb": "dry", "object": "the escargot"},
+    "place basil leaves in the soup": {"verb": "insert", "object": "the basil leaves"},
+    "throwing usb stick against sofa": {"verb": "throw", "object": "the usb stick"},
+    "leaves falling like a feather or paper": {"verb": "fall", "object": "the leaves"},
+    "tearing paper into two pieces": {"verb": "cut", "object": "the paper"},
+    "spread some chopped steamed lobster and sauteed shrimp on the dish": {
+        "object": "the chopped lobster",
+        "verb": "spread",
+    },
+    "covering comb with tissue": {"verb": "cover", "object": "the comb"},
+    "drizzle oilive oil on the mixture": {"verb": "wet", "object": "the mixture"},
+    "drain the water from the tofu box and slice the tofu into cubes": {
+        "verb": "empty",
+        "object": "the tofu box",
+    },
+    "mix in the pepper": {"verb": "mix", "object": "the pepper"},
+    "pouring water onto the floor": {"verb": "wet", "object": "the floor"},
+    "wiping water off of stool": {"verb": "clean", "object": "the stool"},
+    "put on the shin guard sleeves or football socks": {
+        "verb": "insert",
+        "object": "the foot",
+    },
+    "taking usb flashdisk out of blue bowl": {
+        "verb": "pull out",
+        "object": "the usb stick",
+    },
+    "pushing id card so that it falls off the table": {
+        "verb": "drop",
+        "object": "the id card",
+    },
+    "separate the clams from the shells and chop them": {
+        "verb": "separate",
+        "object": "the clams",
+    },
+    "covering a pencil with a paper": {"verb": "cover", "object": "the pencil"},
+    "soak sugar gourd in sugar": {"verb": "wet", "object": "sugar"},
+    "pouring water onto countertop": {"verb": "wet", "object": "the countertop"},
+    "tooth paste falling like a rock": {"verb": "fall", "object": "the tooth paste"},
+    "add two bay leaves carrots celery and onions to the pan": {
+        "verb": "insert",
+        "object": "the bay leaves",
+    },
+    "absorb liquid with dropper": {"verb": "fill", "object": "the dropper"},
+    "attach drawer back panel": {"verb": "attach", "object": "the drawer back panel"},
+    "attaching pen drive to cd player": {"verb": "attach", "object": "the pen drive"},
+    "boil a piece of kombu and a small bowl of bonito flakes in water in a pot": {
+        "verb": "boil",
+        "object": "the kombu",
+    },
+    "boil some onion chunks and baby boy chok in chicken stock with water": {
+        "verb": "boil",
+        "object": "the onion",
+    },
+    "boil the wontons in boiled water": {"verb": "boil", "object": "the wontons"},
+    "boil water and the noodles in it": {"verb": "boil", "object": "the noodles"},
+    "combine flour cornstarch instant mashed potatos and cayenne": {
+        "verb": "combine",
+        "object": "the flour and the potatos",
+    },
+    "combine lemon juice, sumac, garlic, salt, and oil in a bowl": {
+        "verb": "combine",
+        "object": "the lemon juice and the oil",
+    },
+    "combine the patties and cheese and season with salt and pepper": {
+        "verb": "combine",
+        "object": "the patties and the cheese",
+    },
+    "covering keys with cushion": {"verb": "cover", "object": "the keys"},
+    "digging spoon out of powder": {"verb": "uncover", "object": "the spoon"},
+    "digging tv remote out of cap": {"verb": "uncover", "object": "the tv remote"},
+    "dropping lighter in front of statue": {"verb": "drop", "object": "the lighter"},
+    "fit on the fuse": {"verb": "fit", "object": "the fuse"},
+    "form each piece into a ball roll out and roll up": {
+        "verb": "form",
+        "object": "a ball",
+    },
+    "form the boxty into a ball": {"verb": "form", "object": "a ball"},
+    "form the meat into a loaf on a baking sheet": {"verb": "form", "object": "a loaf"},
+    "form the meat into a patty": {"verb": "form", "object": "a patty"},
+    "form the meat into balls and fry": {"verb": "form", "object": "a ball"},
+    "form the rice into a ball": {"verb": "form", "object": "a ball"},
+    "grind all the ingredients and transfer to a bowl": {
+        "verb": "combine",
+        "object": "the ingredients",
+    },
+    "in a bowl combine ground beef bread crumbs cream beaten egg worcestershire sauce salt pepper and some beef broth": {
+        "verb": "combine",
+        "object": "the ingredients",
+    },
 }

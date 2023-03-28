@@ -14,6 +14,7 @@ MANUALLY_EXCLUDED_VERBS = [
     "bangle",
     "banknote",
     "bear",
+    "tip",
     "bent",
     "rod",
     "eat",
