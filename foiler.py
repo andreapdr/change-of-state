@@ -127,3 +127,24 @@ def get_inverse_capt_and_foil(sentence):
         capt = f"Initially, {_object} {aux} {sentence['pre-state']}. Then, someone {_verb} {_object}{' ' + _particle if _particle else ''}. At the end, {_object} {aux} {sentence['post-state']}."
         foil = f"Initially, {_object} {aux} {sentence['post-state']}. Then, someone {_inverse} {_object}{' ' + _particle_inv if _particle_inv else ''}. At the end, {_object} {aux} {sentence['pre-state']}."
     return capt, foil
+
+
+if __name__ == "__main__":
+    import json
+    from os.path import expanduser
+
+    foil_types = ["action", "pre-state", "post-state", "inverse"]
+
+    datapath = expanduser("~/datasets/vl-bench/change-state.json")
+    outpath = expanduser("~/datasets/vl-bench/newfoil.json")
+
+    data = json.load(open(datapath))
+    print(f"- foiling data at {datapath} - {len(data)} examples")
+
+    foiled_dataset = {}
+    for k, v in data.items():
+        _foils = create_foils(v["change_of_state"], foil_types=foil_types)
+        foiled_dataset[k] = v
+        foiled_dataset[k].update(_foils)
+
+    json.dump(foiled_dataset, open(outpath, "w"))
