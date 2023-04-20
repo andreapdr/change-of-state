@@ -1,5 +1,7 @@
 # from https://englishstudyonline.org/intransitive-verb/
 INTRANSITIVE = [
+    "ascend",
+    "descend",
     "agree",
     "appear",
     "arrive",
